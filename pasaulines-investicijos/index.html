@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="lt" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pasaulinės investicijos pagal sektorius 1990–2025 m.</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#080b12; --surface:#0f1420; --surface2:#161d30; --border:rgba(255,255,255,.10);
+    --text:#e6ebf7; --muted:#9aa3c0; --accent:#38f0a8; --on-accent:#06110c;
+    --grid:rgba(255,255,255,.07); --band:rgba(239,68,68,.13);
+    --c1:#38f0a8; --c2:#f87171; --c3:#60a5fa; --c4:#fbbf24; --c5:#b69cfc; --c6:#fb7185;
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg:#f4f6fb; --surface:#ffffff; --surface2:#eef1f8; --border:rgba(15,20,40,.12);
+      --text:#141a2b; --muted:#4a5270; --accent:#0a7a52; --on-accent:#ffffff;
+      --grid:rgba(15,20,40,.08); --band:rgba(220,38,38,.09);
+      --c1:#0d9467; --c2:#d62f2f; --c3:#2563eb; --c4:#b45309; --c5:#7c3aed; --c6:#db2777;
+    }
+  }
+  :root[data-theme="light"] {
+    --bg:#f4f6fb; --surface:#ffffff; --surface2:#eef1f8; --border:rgba(15,20,40,.12);
+    --text:#141a2b; --muted:#4a5270; --accent:#0a7a52; --on-accent:#ffffff;
+    --grid:rgba(15,20,40,.08); --band:rgba(220,38,38,.09);
+    --c1:#0d9467; --c2:#d62f2f; --c3:#2563eb; --c4:#b45309; --c5:#7c3aed; --c6:#db2777;
+  }
+  :root[data-theme="dark"] {
+    --bg:#080b12; --surface:#0f1420; --surface2:#161d30; --border:rgba(255,255,255,.10);
+    --text:#e6ebf7; --muted:#9aa3c0; --accent:#38f0a8; --on-accent:#06110c;
+    --grid:rgba(255,255,255,.07); --band:rgba(239,68,68,.13);
+    --c1:#38f0a8; --c2:#f87171; --c3:#60a5fa; --c4:#fbbf24; --c5:#b69cfc; --c6:#fb7185;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-padding-top:env(safe-area-inset-top,0px)}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;padding:32px 22px 48px;min-height:100%}
+  .container{max-width:1160px;margin:0 auto}
+  .mono{font-family:'DM Mono',ui-monospace,Menlo,Consolas,monospace}
+
+  header{margin-bottom:24px;display:flex;gap:16px;align-items:flex-start}
+  .bar{width:4px;min-height:84px;background:linear-gradient(180deg,var(--accent),transparent);border-radius:4px;flex-shrink:0}
+  .eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+  h1{font-family:'Playfair Display',Georgia,serif;font-size:clamp(22px,3.2vw,36px);font-weight:900;line-height:1.1;margin-bottom:8px}
+  .subtitle{font-size:14px;color:var(--muted);max-width:640px;line-height:1.6}
+
+  .notice{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--c4);border-radius:10px;padding:12px 16px;font-size:13px;line-height:1.6;margin-bottom:20px}
+  .notice b{color:var(--text)}
+
+  .era-row{display:flex;gap:7px;margin-bottom:20px;flex-wrap:wrap}
+  .era{font-size:10.5px;letter-spacing:.06em;padding:4px 10px;border-radius:20px;border:1px solid var(--border);color:var(--muted);background:var(--surface)}
+  .era.crisis{color:var(--c2);border-color:color-mix(in srgb,var(--c2) 40%,transparent)}
+
+  .kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:10px;margin-bottom:20px}
+  .kpi{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+  .kpi-label{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  .kpi-value{font-family:'Playfair Display',Georgia,serif;font-size:23px;font-weight:700;color:var(--accent);line-height:1.1}
+  .kpi-sub{font-size:12px;color:var(--muted);margin-top:4px}
+
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:16px}
+  .card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px}
+  .card-title{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .toggle-group{display:flex;gap:4px;background:var(--bg);border-radius:8px;padding:3px;border:1px solid var(--border)}
+  .toggle-btn{background:none;border:none;color:var(--muted);font:500 11px 'DM Mono',ui-monospace,monospace;letter-spacing:.06em;padding:6px 11px;border-radius:5px;cursor:pointer}
+  .toggle-btn:hover{color:var(--text)}
+  .toggle-btn.active{background:var(--accent);color:var(--on-accent)}
+  .toggle-btn:focus-visible,.legend-item:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  .chart-main{position:relative;height:430px}
+  .chart-sm{position:relative;height:240px}
+  .legend{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:14px}
+  .legend-item{display:flex;align-items:center;gap:7px;cursor:pointer;padding:5px 10px;border-radius:20px;border:1px solid var(--border);font-size:13px;background:none;color:var(--text);font-family:inherit}
+  .legend-item.dimmed{opacity:.45;text-decoration:line-through}
+  .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+  .tag{font-size:10px;color:var(--muted);border:1px solid var(--border);border-radius:4px;padding:0 4px;margin-left:2px}
+  .note{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.6}
+  .swatch{display:inline-block;width:18px;height:10px;border-radius:2px;vertical-align:middle;margin-right:4px}
+
+  .bottom-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media (max-width:680px){.bottom-row{grid-template-columns:1fr}.chart-main{height:360px}}
+  .sources{font-size:12px;color:var(--muted);line-height:1.8;border-top:1px solid var(--border);padding-top:14px}
+  .sources b{color:var(--text);font-weight:500}
+  .sources a,.kpi-sub a{color:var(--accent);text-decoration:underline;text-underline-offset:2px}
+  .sources a:hover,.kpi-sub a:hover{text-decoration-thickness:2px}
+  .src-list{margin:6px 0 10px 22px;columns:2 340px;column-gap:28px}
+  .src-list li{break-inside:avoid}
+  .src-group{margin-top:10px;font-weight:500;color:var(--text)}
+  .src-list li{margin-bottom:2px}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="bar"></div>
+    <div>
+      <div class="eyebrow mono"><a href="/" style="color:inherit;text-decoration:none">← Bitai</a> · 35 metų kapitalo srautai pasaulyje</div>
+      <h1>Pasaulinės investicijos pagal sektorius<br>1990–2025 m.</h1>
+      <p class="subtitle">Metinės investicijos, mlrd. JAV dolerių. Energetikos 2015–2025 m. duomenys – pagal Tarptautinės energetikos agentūros (TEA) ataskaitą <a href="https://www.iea.org/reports/world-energy-investment-2025/executive-summary" target="_blank" rel="noopener" style="color:var(--accent)">World Energy Investment 2025</a> (2024 m. kainomis).</p>
+    </div>
+  </header>
+
+  <div class="notice">
+    <b>Apie duomenis.</b> Šaltiniais pagrįsti švariosios energetikos ir iškastinio kuro 2015–2025 m. duomenys, tiesioginių užsienio investicijų (TUI) duomenys ir pavieniai kitų sektorių taškai (jų šaltinis nurodomas užvedus pelę). Kitos reikšmės yra <b>apytiksliai vertinimai</b>: grafike jie vaizduojami blyškesne spalva arba punktyrine linija. Nėra vieno viešo šaltinio, kuriame būtų visų šių sektorių metinės investicijos nuo 1990 m.
+  </div>
+
+  <div class="era-row mono">
+    <span class="era crisis">1991–1992 m. recesija</span>
+    <span class="era">1994–2000 m. globalizacijos pakilimas</span>
+    <span class="era crisis">2001–2002 m. interneto burbulo sprogimas</span>
+    <span class="era">2003–2007 m. žaliavų kainų pakilimas</span>
+    <span class="era crisis">2008–2009 m. pasaulinė finansų krizė</span>
+    <span class="era">2010–2019 m. augimo dešimtmetis</span>
+    <span class="era crisis">2020 m. COVID-19 pandemija</span>
+    <span class="era">2021–2025 m. energetikos pertvarka</span>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi"><div class="kpi-label mono">Pasaulio TUI 1990 m.</div><div class="kpi-value">222 mlrd. USD</div><div class="kpi-sub">Tuometinis rekordas (<a href="https://www.elibrary.imf.org/display/book/9781557754998/ch07.xml" target="_blank" rel="noopener">TVF</a>)</div></div>
+    <div class="kpi"><div class="kpi-label mono">Pasaulio TUI 2000 m.</div><div class="kpi-value">1,5 trln. USD</div><div class="kpi-sub">Įmonių susijungimų banga (<a href="https://www.imf.org/external/np/sta/fdi/eng/2003/102803.pdf" target="_blank" rel="noopener">TVF</a>)</div></div>
+    <div class="kpi"><div class="kpi-label mono">Pasaulio TUI 2025 m.</div><div class="kpi-value">1,6 trln. USD</div><div class="kpi-sub">+14 %, palyginti su 2024 m. (<a href="https://unctad.org/topic/investment/investment-statistics-and-trends" target="_blank" rel="noopener">UNCTAD</a>)</div></div>
+    <div class="kpi"><div class="kpi-label mono">Švarioji energetika 2025 m.</div><div class="kpi-value">2,2 trln. USD</div><div class="kpi-sub">Iškastiniam kurui – 1,1 trln. (<a href="https://www.iea.org/reports/world-energy-investment-2025/executive-summary" target="_blank" rel="noopener">TEA</a>)</div></div>
+    <div class="kpi"><div class="kpi-label mono">Švarioji ir iškastinė</div><div class="kpi-value">2 : 1</div><div class="kpi-sub">Apie 2018 m. buvo 1 : 1 (<a href="https://www.iea.org/reports/world-energy-investment-2023/overview-and-key-findings" target="_blank" rel="noopener">TEA</a>)</div></div>
+    <div class="kpi"><div class="kpi-label mono">Saulės energetika 2025 m.</div><div class="kpi-value">450 mlrd. USD</div><div class="kpi-sub">Didžiausia atskira investicijų kategorija (<a href="https://www.iea.org/reports/world-energy-investment-2025/executive-summary" target="_blank" rel="noopener">TEA</a>)</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title mono">Metinės investicijos pagal sektorius, mlrd. USD (1990–2025 m.)</div>
+      <div class="toggle-group" role="group" aria-label="Diagramos tipas">
+        <button class="toggle-btn active" data-mode="stacked">Sudėtinė</button>
+        <button class="toggle-btn" data-mode="grouped">Grupuota</button>
+        <button class="toggle-btn" data-mode="line">Linijos</button>
+      </div>
+    </div>
+    <div class="chart-main"><canvas id="mainChart" aria-label="Investicijos pagal sektorius 1990–2025 m."></canvas></div>
+    <p class="note">Raudonos juostos žymi krizių laikotarpius (1991–1992, 2001–2002, 2008–2009 ir 2020 m.). <span class="swatch" style="background:var(--c1);opacity:.35"></span>Blyškūs stulpeliai ir punktyrinės linijos – vertinimai, ryškūs – šaltiniais pagrįsti duomenys. 2025 m. reikšmės – išankstinės.</p>
+    <div class="legend" id="mainLegend"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title mono" style="margin-bottom:6px">Pasaulio tiesioginės užsienio investicijos, mlrd. USD</div>
+    <p class="note" style="margin:0 0 12px">Rodomi tik metai, kurių reikšmės paskelbtos šaltiniuose (TVF, UNCTAD). Tarp taškų – linijinė jungtis, ne duomenys. Skirtingų leidimų metodika šiek tiek skiriasi.</p>
+    <div class="chart-sm"><canvas id="fdiChart" aria-label="Pasaulio TUI 1990–2025 m."></canvas></div>
+  </div>
+
+  <div class="bottom-row">
+    <div class="card">
+      <div class="card-title mono" style="margin-bottom:14px">Sektorių dalys, 1990–2025 m. suma (su vertinimais)</div>
+      <div class="chart-sm"><canvas id="pieChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title mono" style="margin-bottom:14px">Švarioji energetika ir iškastinis kuras</div>
+      <div class="chart-sm"><canvas id="trendChart"></canvas></div>
+      <p class="note">TEA ir BloombergNEF švariąją energetiką apibrėžia skirtingai, todėl jų reikšmės nesutampa. BloombergNEF metodika keitėsi (pvz., nuo 2020 m. įtraukti elektros tinklai).</p>
+    </div>
+  </div>
+
+  <div class="sources">
+    <b>Šaltiniai</b> (numeriai atitinka nuorodas iššokančiuose languose)
+    <div class="src-group">Energetika (TEA)</div><ol class="src-list"><li value="1"><a href="https://www.iea.org/reports/world-energy-investment-2025/executive-summary" target="_blank" rel="noopener">TEA. World Energy Investment 2025: santrauka</a> – 2025 m.: švarioji energetika 2,2 trln., iškastinis kuras 1,1 trln., saulės energetika 450 mlrd. USD</li><li value="2"><a href="https://www.iea.org/data-and-statistics/charts/global-investment-in-clean-energy-and-fossil-fuels-2015-2025" target="_blank" rel="noopener">TEA. Global investment in clean energy and fossil fuels, 2015–2025</a> – 2015–2025 m. metinės reikšmės (galima atsisiųsti CSV)</li><li value="3"><a href="https://iea.blob.core.windows.net/assets/1c136349-1c31-4201-9ed7-1a7d532e4306/WorldEnergyInvestment2025.pdf" target="_blank" rel="noopener">TEA. World Energy Investment 2025 (PDF)</a> – visa ataskaita</li><li value="4"><a href="https://www.iea.org/reports/world-energy-investment-2023/overview-and-key-findings" target="_blank" rel="noopener">TEA. World Energy Investment 2023: pagrindinės išvados</a> – santykis 1,7 : 1 (2023 m.), 1 : 1 (~2018 m.)</li><li value="5"><a href="https://www.iea.org/news/investment-in-clean-energy-this-year-is-set-to-be-twice-the-amount-going-to-fossil-fuels" target="_blank" rel="noopener">TEA. Naujiena apie 2024 m. investicijas</a> – 2024 m.: ~2 trln. švariajai energetikai, >1 trln. iškastiniam kurui; tinklams ~300 → 400 mlrd.</li></ol><div class="src-group">Energetikos pertvarka (BloombergNEF)</div><ol class="src-list"><li value="6"><a href="https://assets.bbhub.io/professional/sites/24/Energy-Transition-Investment-Trends_Free-Summary_Jan2021.pdf" target="_blank" rel="noopener">BloombergNEF. Energy Transition Investment Trends 2021 (PDF)</a> – 2010 m. 235,4; 2019 m. 458,6 mlrd. USD</li><li value="7"><a href="https://assets.bbhub.io/professional/sites/24/Energy-Transition-Investment-Trends-Exec-Summary-2022.pdf" target="_blank" rel="noopener">BloombergNEF. Energy Transition Investment Trends 2022 (PDF)</a> – 2011 m. 264; 2020 m. 595; 2021 m. 755 mlrd. USD</li><li value="8"><a href="https://www.cleanenergyministerial.org/content/uploads/2023/07/cem-factbook-1.pdf" target="_blank" rel="noopener">BloombergNEF. Energy Transition Factbook 2023 (PDF)</a> – 2022 m. 1,1 trln. USD</li><li value="9"><a href="https://commons.wikimedia.org/wiki/File:20210119_Renewable_energy_investment_-_2004-_BloombergNEF.svg" target="_blank" rel="noopener">Wikimedia Commons. BloombergNEF duomenų grafikas</a> – 2023 m. 1,8 trln.; 2025 m. 2,3 trln. USD (antrinis šaltinis)</li></ol><div class="src-group">Tiesioginės užsienio investicijos (TVF, UNCTAD)</div><ol class="src-list"><li value="10"><a href="https://www.elibrary.imf.org/display/book/9781557754998/ch07.xml" target="_blank" rel="noopener">TVF. Foreign Direct Investment in the World Economy</a> – TUI 1990–1993 m.</li><li value="11"><a href="https://press.un.org/en/1995/19951215.tad1807.html" target="_blank" rel="noopener">UNCTAD. World Investment Report 1995: pranešimas spaudai</a> – TUI 1994 m. 226 mlrd. USD</li><li value="12"><a href="https://unctad.org/system/files/official-document/dtci32ov.pdf" target="_blank" rel="noopener">UNCTAD. World Investment Report 1996: apžvalga (PDF)</a> – TUI 1995 m. 315 mlrd. USD</li><li value="13"><a href="https://www.imf.org/external/np/sta/fdi/eng/2003/102803.pdf" target="_blank" rel="noopener">TVF. Foreign Direct Investment Trends and Statistics (PDF)</a> – TUI 2000 m. 1,5 trln.; 2001 m. 0,7 trln. USD</li><li value="14"><a href="https://www.business-standard.com/amp/article/reuters/u-n-sees-potential-for-deals-worth-trillions-as-fdi-revives-114062401351_1.html" target="_blank" rel="noopener">Reuters (Business Standard), remiantis UNCTAD</a> – TUI 2007 m. 2 trln.; 2009 m. 1,2 trln. USD</li><li value="15"><a href="https://unctad.org/system/files/official-document/wir2014_en.pdf" target="_blank" rel="noopener">UNCTAD. World Investment Report 2014 (PDF)</a> – TUI 2012 m. 1,33 trln.; 2013 m. 1,45 trln. USD</li><li value="16"><a href="https://unctad.org/news/global-foreign-direct-investment-slides-third-consecutive-year" target="_blank" rel="noopener">UNCTAD. TUI mažėja trečius metus iš eilės (2019)</a> – TUI 2017 m. 1,5 trln.; 2018 m. 1,3 trln. USD</li><li value="17"><a href="https://trendsresearch.org/insight/the-post-pandemic-reality-of-fdi/" target="_blank" rel="noopener">TRENDS Research, remiantis UNCTAD</a> – TUI 2019 m. 1,5 trln.; 2020 m. 1,0 trln. USD</li><li value="18"><a href="https://unctad.org/topic/investment/world-investment-report/fdi-flows-2022" target="_blank" rel="noopener">UNCTAD. World Investment Report 2022: TUI srautai</a> – TUI 2021 m. ~1,6 trln. USD</li><li value="19"><a href="https://www.imf.org/external/pubs/ft/bop/2023/pdf/42/23-21.pdf" target="_blank" rel="noopener">UNCTAD. World Investment Report 2023: apžvalga (PDF)</a> – TUI 2022 m. 1,3 trln. USD</li><li value="20"><a href="https://unctad.org/news/explore-global-investment-data-and-changing-trends" target="_blank" rel="noopener">UNCTAD. TUI duomenų naršyklė (2025)</a> – TUI 2024 m. 1,5 trln. USD</li><li value="21"><a href="https://unctad.org/topic/investment/investment-statistics-and-trends" target="_blank" rel="noopener">UNCTAD. Investment statistics and trends</a> – TUI 2025 m. 1,6 trln. USD (+14 %)</li></ol><div class="src-group">Kiti sektoriai</div><ol class="src-list"><li value="22"><a href="https://impacts.savills.com/market-trends/global-real-estate-investment-2025-and-beyond.html" target="_blank" rel="noopener">Savills. Global real estate investment: 2025 and beyond</a> – NT investicijos 2023 m. 699 mlrd. USD; 2022 m. >1 trln.</li><li value="23"><a href="https://www.mckinsey.com/mgi/our-research/the-fdi-shake-up-how-foreign-direct-investment-today-may-shape-industry-and-trade-tomorrow" target="_blank" rel="noopener">McKinsey Global Institute. The FDI shake-up (2025)</a> – technologijų TUI: ~490 mlrd. USD per metus 2022–2024 m., 2025 m. tempas ~840 mlrd.</li></ol>
+    <p><b>Vertinimai</b> (1990–2014 m. energetika ir dauguma kitų sektorių reikšmių) sudaryti pagal bendras tendencijas ir nėra oficiali statistika. TEA reikšmės tarp paskelbtų atskaitos taškų (2016–2022 m.) nuskaitytos apytiksliai pagal grafiką [2]. Sektoriai iš dalies persidengia (pvz., elektros tinklai priskiriami ir švariajai energetikai, ir infrastruktūrai), todėl sudėtinė suma nėra tiksli visų pasaulio investicijų suma.</p>
+  </div>
+</div>
+<script>
+const years=[];for(let y=1990;y<=2025;y++)years.push(y===2025?'2025*':String(y));
+const I=y=>y-1990;
+
+// Švarioji energetika (TEA apibrėžimas) ir iškastinis kuras
+const clean=[350,360,370,385,400,420,440,460,475,490,500,515,530,560,600,650,710,780,850,880,950,1030,1050,1080,1120,
+             1150,1170,1180,1200,1250,1260,1430,1640,1880,2080,2200];
+const fossil=[420,400,390,390,400,420,450,480,460,420,450,480,470,520,600,720,850,1000,1150,950,1050,1200,1300,1350,1400,
+              1350,1100,1080,1130,1170,900,950,1050,1100,1120,1100];
+const tech=[55,58,60,65,78,95,115,140,165,190,205,130,100,108,132,155,175,205,185,150,170,195,205,210,220,240,260,285,320,355,320,400,470,480,520,840];
+const health=[28,29,30,32,35,39,44,50,55,58,62,64,66,70,76,84,92,100,108,112,108,114,120,124,130,140,150,162,172,185,200,228,242,252,265,288];
+const realEstate=[200,170,155,160,190,230,275,350,430,480,545,460,420,475,550,655,760,880,665,435,540,630,670,695,775,840,905,970,930,900,700,1250,1050,699,750,850];
+const infra=[90,88,86,88,92,98,108,120,135,145,165,162,158,165,175,190,210,235,245,220,250,265,274,282,292,298,303,310,320,308,282,312,352,342,402,428];
+
+// Šaltiniais pagrįsti taškai: indeksas -> tekstas
+const ieaSrc={};for(let y=2015;y<=2025;y++)ieaSrc[I(y)]='≈ TEA [2]';
+Object.assign(ieaSrc,{[I(2023)]:'TEA [2], [4]',[I(2024)]:'TEA [5]',[I(2025)]:'TEA [1]'});
+
+const sectors=[
+  {label:'Švarioji energetika',cv:'--c1',data:clean,src:ieaSrc},
+  {label:'Iškastinis kuras',cv:'--c2',data:fossil,src:ieaSrc},
+  {label:'Technologijos',cv:'--c3',data:tech,src:{[I(2022)]:'vidurkis ≈490 mlrd. 2022–2024 m. [23]',[I(2023)]:'vidurkis ≈490 mlrd. 2022–2024 m. [23]',[I(2024)]:'vidurkis ≈490 mlrd. 2022–2024 m. [23]',[I(2025)]:'McKinsey tempas [23]'}},
+  {label:'Sveikatos apsauga',cv:'--c4',data:health,src:{}},
+  {label:'Nekilnojamasis turtas',cv:'--c5',data:realEstate,src:{[I(2022)]:'> 1 trln. [22]',[I(2023)]:'Savills [22]'}},
+  {label:'Infrastruktūra',cv:'--c6',data:infra,src:{}},
+];
+sectors.forEach(s=>s.est=i=>!(i in s.src));
+
+// TUI: tik paskelbti taškai
+const fdiPts={1990:[222,10],1991:[178,10],1992:[162,10],1993:[175,10],1994:[226,11],1995:[315,12],2000:[1500,13],2001:[700,13],
+  2007:[2000,14],2009:[1200,14],2012:[1330,15],2013:[1450,15],2017:[1500,16],2018:[1300,16],2019:[1500,17],2020:[1000,17],
+  2021:[1600,18],2022:[1300,19],2024:[1500,20],2025:[1600,21]};
+const fdi=years.map((_,i)=>fdiPts[1990+i]?fdiPts[1990+i][0]:null);
+// BloombergNEF energetikos pertvarka
+const bnefPts={2010:[235,6],2011:[264,7],2019:[459,6],2020:[595,7],2021:[755,7],2022:[1100,8],2023:[1800,9],2025:[2300,9]};
+const bnef=years.map((_,i)=>bnefPts[1990+i]?bnefPts[1990+i][0]:null);
+
+const nf=new Intl.NumberFormat('lt-LT',{maximumFractionDigits:2});
+const fmt=v=>v>=1000?nf.format(v/1000)+' trln. USD':nf.format(v)+' mlrd. USD';
+const fmtAxis=v=>v>=1000?nf.format(v/1000)+' trln.':nf.format(v)+' mlrd.';
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const alpha=(hex,a)=>{const n=parseInt(hex.replace('#',''),16);return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`};
+const bandsPlugin={id:'bands',beforeDatasetsDraw(chart){
+  const {ctx,chartArea:a,scales:{x}}=chart; if(!x)return;
+  const step=a.width/years.length; ctx.save(); ctx.fillStyle=css('--band');
+  [[1,2],[11,12],[18,19],[30,30]].forEach(([s,e])=>{const x0=x.getPixelForValue(s)-step/2,x1=x.getPixelForValue(e)+step/2;ctx.fillRect(x0,a.top,x1-x0,a.bottom-a.top);});
+  ctx.restore();
+}};
+let mode='stacked',hidden=new Set(),charts={};
+const tip=()=>({backgroundColor:css('--surface2'),borderColor:css('--border'),borderWidth:1,titleColor:css('--text'),bodyColor:css('--text'),padding:12,titleFont:{family:"'DM Mono'"},bodyFont:{family:"'DM Sans'",size:12}});
+const axes=(stacked,every)=>{const t=css('--muted'),g=css('--grid');return{
+  x:{stacked,grid:{color:g},ticks:{color:t,font:{family:"'DM Mono'",size:11},maxRotation:0,autoSkip:false,callback:(_,i)=>i%every===0?years[i]:''}},
+  y:{stacked,grid:{color:g},border:{display:false},ticks:{color:t,font:{family:"'DM Mono'",size:11},callback:fmtAxis}}}};
+
+function buildMain(){
+  charts.main?.destroy();
+  const type=mode==='line'?'line':'bar',stacked=mode==='stacked';
+  const ds=sectors.map((s,k)=>{const c=css(s.cv);return{label:s.label,data:s.data,hidden:hidden.has(k),
+    backgroundColor:ctx=>alpha(c,s.est(ctx.dataIndex)?.35:.9),borderColor:c,borderWidth:type==='bar'?0:2,borderRadius:2,tension:.35,
+    pointRadius:type==='line'?ctx=>s.est(ctx.dataIndex)?0:3:0,pointHoverRadius:5,pointBackgroundColor:c,
+    segment:{borderDash:ctx=>s.est(ctx.p1DataIndex)?[5,4]:undefined}}});
+  charts.main=new Chart(document.getElementById('mainChart'),{type,data:{labels:years,datasets:ds},plugins:[bandsPlugin],
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false},tooltip:{...tip(),callbacks:{label:ctx=>{const s=sectors[ctx.datasetIndex];
+        return ` ${s.label}: ${fmt(ctx.parsed.y)} – ${s.est(ctx.dataIndex)?'vertinimas':s.src[ctx.dataIndex]}`}}}},
+      scales:axes(stacked,5)}});
+}
+function buildFdi(){
+  charts.fdi?.destroy(); const c=css('--accent');
+  charts.fdi=new Chart(document.getElementById('fdiChart'),{type:'line',data:{labels:years,datasets:[{label:'Pasaulio TUI',data:fdi,spanGaps:true,
+    borderColor:c,backgroundColor:alpha(c.startsWith('#')?c:'#38f0a8',.12),fill:true,tension:0,borderWidth:2,pointRadius:4,pointHoverRadius:6,pointBackgroundColor:c}]},
+    plugins:[bandsPlugin],options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'nearest',intersect:false,axis:'x'},
+      plugins:{legend:{display:false},tooltip:{...tip(),filter:i=>i.raw!==null,callbacks:{label:ctx=>` ${fmt(ctx.parsed.y)} – šaltinis [${fdiPts[1990+ctx.dataIndex][1]}]`}}},
+      scales:axes(false,5)}});
+}
+function buildPie(){
+  charts.pie?.destroy(); const cols=sectors.map(s=>css(s.cv));
+  charts.pie=new Chart(document.getElementById('pieChart'),{type:'doughnut',
+    data:{labels:sectors.map(s=>s.label),datasets:[{data:sectors.map(s=>s.data.reduce((a,b)=>a+b,0)),backgroundColor:cols.map(c=>alpha(c,.85)),borderColor:css('--surface'),borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{
+      legend:{position:'right',labels:{color:css('--text'),font:{family:"'DM Sans'",size:12},boxWidth:10,padding:9}},
+      tooltip:{...tip(),callbacks:{label:ctx=>{const t=ctx.dataset.data.reduce((a,b)=>a+b,0);return ` ${fmt(ctx.parsed)} (${nf.format(Math.round(ctx.parsed/t*1000)/10)} %)`}}}}}});
+}
+function buildTrend(){
+  charts.trend?.destroy();
+  const mk=s=>{const c=css(s.cv);return{label:s.label+' (TEA)',data:s.data,borderColor:c,backgroundColor:alpha(c,.1),fill:true,tension:.35,borderWidth:2.5,pointRadius:0,pointHoverRadius:5,
+    segment:{borderDash:ctx=>s.est(ctx.p1DataIndex)?[5,4]:undefined}}};
+  const bc=css('--c3');
+  charts.trend=new Chart(document.getElementById('trendChart'),{type:'line',
+    data:{labels:years,datasets:[mk(sectors[0]),mk(sectors[1]),{label:'Energetikos pertvarka (BloombergNEF)',data:bnef,spanGaps:true,borderColor:bc,backgroundColor:bc,borderWidth:2,pointRadius:3,pointHoverRadius:5,tension:0,fill:false}]},
+    plugins:[bandsPlugin],options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{labels:{color:css('--text'),font:{family:"'DM Sans'",size:11},usePointStyle:true,pointStyle:'circle',boxWidth:8}},
+        tooltip:{...tip(),filter:i=>i.raw!==null,callbacks:{label:ctx=>{
+          if(ctx.datasetIndex===2)return ` BloombergNEF: ${fmt(ctx.parsed.y)} – [${bnefPts[1990+ctx.dataIndex][1]}]`;
+          const s=sectors[ctx.datasetIndex];return ` ${s.label}: ${fmt(ctx.parsed.y)} – ${s.est(ctx.dataIndex)?'vertinimas':s.src[ctx.dataIndex]}`}}}},
+      scales:axes(false,10)}});
+}
+function buildLegend(){
+  const el=document.getElementById('mainLegend'); el.innerHTML='';
+  sectors.forEach((s,k)=>{const b=document.createElement('button');b.className='legend-item'+(hidden.has(k)?' dimmed':'');
+    b.setAttribute('aria-pressed',String(!hidden.has(k)));
+    const n=Object.keys(s.src).length;
+    b.innerHTML=`<span class="dot" style="background:var(${s.cv})"></span>${s.label}<span class="tag mono">${n>=10?'TEA':n?'dalinai vert.':'vert.'}</span>`;
+    b.onclick=()=>{hidden.has(k)?hidden.delete(k):hidden.add(k);buildLegend();charts.main.setDatasetVisibility(k,!hidden.has(k));charts.main.update();};
+    el.appendChild(b);});
+}
+function buildAll(){buildMain();buildFdi();buildPie();buildTrend();buildLegend();}
+document.querySelectorAll('.toggle-btn').forEach(b=>b.onclick=()=>{document.querySelectorAll('.toggle-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');mode=b.dataset.mode;buildMain();});
+matchMedia('(prefers-color-scheme: light)').addEventListener('change',buildAll);
+document.fonts?.ready.then(buildAll); buildAll();
+</script>
+</body>
+</html>

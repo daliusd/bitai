@@ -1,0 +1,18 @@
+service: bitai
+
+image: daliusd1982/bitai
+
+servers:
+  web:
+    - 195.201.143.78
+
+proxy:
+  ssl: true
+  hosts:
+    - bitai.ffff.lt
+
+registry:
+  server: localhost:5555
+
+builder:
+  arch: amd64

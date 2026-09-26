@@ -8,5 +8,6 @@ Makefile
 **/node_modules
 apps/*/dist
 cholesterolis
+kraujospudis
 README.md
 LICENSE

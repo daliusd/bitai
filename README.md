@@ -12,6 +12,7 @@ Live at **https://bitai.ffff.lt** (the site itself is in Lithuanian).
 | `index.html`, `css/`, `images/` | Landing page listing all tools |
 | `pasaulines-investicijos/` | Global investments by sector visualization (static HTML) |
 | `apps/cholesterolis/` | Science-based cholesterol calculator (React + TypeScript + Vite) |
+| `apps/kraujospudis/` | Science-based blood pressure calculator (React + TypeScript + Vite) |
 | `up/` | Health check endpoint used by Kamal |
 
 ## Development
@@ -20,14 +21,14 @@ Requires Node.js 22+.
 
 ```sh
 make run     # serve the repo at http://localhost:9876
-make build   # build the cholesterol calculator into ./cholesterolis
-make test    # run the calculator's tests (Vitest)
+make build   # build the calculators into ./cholesterolis and ./kraujospudis
+make test    # run the calculators' tests (Vitest)
 ```
 
-To work on the calculator with hot reload:
+To work on a calculator with hot reload:
 
 ```sh
-cd apps/cholesterolis
+cd apps/cholesterolis   # or apps/kraujospudis
 npm install
 npm run dev
 ```

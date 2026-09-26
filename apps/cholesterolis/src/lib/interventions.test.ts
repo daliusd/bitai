@@ -1,0 +1,159 @@
+import { describe, expect, it } from 'vitest';
+import {
+  DEFAULT_CHOICES,
+  activityEffect,
+  alcoholEffect,
+  applicability,
+  computeEffects,
+  fiberEffect,
+  gramsToEnergyPct,
+  lowCarbEffect,
+  omega3Effect,
+  resolveEffect,
+  project,
+  satFatEffect,
+  smokingEffect,
+  sugarEffect,
+  weightEffect,
+} from './interventions';
+import type { Lifestyle, Lipids } from './types';
+
+const unknown: Lifestyle = {
+  smoking: 'unknown',
+  alcohol: 'unknown',
+  activity: 'unknown',
+  nuts: false,
+  sterols: false,
+  oats: false,
+  omega3: false,
+};
+const base: Lipids = { tc: 6.2, ldl: 4.1, hdl: 1.3, tg: 1.8 };
+
+describe('single interventions', () => {
+  it('weight loss follows Dattilo 1992 per-kg values', () => {
+    const e = weightEffect(10);
+    expect(e.ldl).toBeCloseTo(-0.2);
+    expect(e.hdl).toBeCloseTo(0.09);
+    expect(e.tg).toBeCloseTo(-0.15);
+    expect(e.tc).toBeCloseTo(-0.5);
+  });
+
+  it('saturated fat converts grams to energy percent', () => {
+    expect(gramsToEnergyPct(10, 2000)).toBeCloseTo(4.5);
+    const e = satFatEffect(10, 'pufa', 2000);
+    expect(e.ldl).toBeCloseTo(-0.055 * 4.5);
+    expect(satFatEffect(10, 'carbs', 2000).tg).toBeGreaterThan(0);
+  });
+
+  it('sugar scales linearly to the meta-analysis contrast', () => {
+    expect(sugarEffect(50).tg).toBeCloseTo(-0.11);
+    expect(sugarEffect(25).ldl).toBeCloseTo(-0.06);
+  });
+
+  it('soluble fibre is capped at the studied 10 g/day', () => {
+    expect(fiberEffect(3).ldl).toBeCloseTo(-0.135);
+    expect(fiberEffect(20).ldl).toBeCloseTo(fiberEffect(10).ldl);
+  });
+
+  it('exercise effect depends on current activity', () => {
+    expect(activityEffect('150', 'low').hdl).toBeCloseTo(0.065);
+    expect(activityEffect('300', 'medium').hdl).toBeCloseTo(0.025);
+    expect(activityEffect('150', 'medium').hdl).toBe(0);
+    expect(activityEffect('300', 'high').hdl).toBe(0);
+  });
+
+  it('smoking cessation does nothing for non-smokers', () => {
+    expect(smokingEffect(true, unknown).hdl).toBeCloseTo(0.1);
+    expect(smokingEffect(true, { ...unknown, smoking: 'no' }).hdl).toBe(0);
+  });
+
+  it('alcohol reduction lowers TG and HDL, scaled for occasional drinkers', () => {
+    const regular = alcoholEffect(true, { ...unknown, alcohol: 'regular' });
+    expect(regular.hdl).toBeCloseTo(-0.103, 3);
+    expect(regular.tg).toBeCloseTo(-0.064, 3);
+    const occasional = alcoholEffect(true, { ...unknown, alcohol: 'occasional' });
+    expect(occasional.tg).toBeCloseTo(regular.tg / 4);
+    expect(alcoholEffect(true, { ...unknown, alcohol: 'none' }).tg).toBe(0);
+  });
+});
+
+describe('triglyceride levers', () => {
+  it('omega-3 lowers TG by 6 % per gram of EPA+DHA', () => {
+    expect(omega3Effect(0).tgPct).toBeUndefined();
+    expect(omega3Effect(4).tgPct).toBeCloseTo(-0.24);
+    const r = resolveEffect(omega3Effect(2), base);
+    expect(r.tg).toBeCloseTo(-0.216);
+    expect(r.tc).toBeCloseTo(-0.216 / 2.2);
+  });
+
+  it('low-carb diet lowers TG but raises LDL and HDL', () => {
+    expect(lowCarbEffect(true)).toEqual({ ldl: 0.16, hdl: 0.14, tg: -0.26 });
+    expect(lowCarbEffect(false).tg).toBe(0);
+  });
+
+  it('projects relative TG changes and skips omega-3 for current users', () => {
+    const choices = { ...DEFAULT_CHOICES, omega3G: 4 as const };
+    expect(project(base, computeEffects(choices, { sex: '' }, unknown)).lipids.tg).toBeCloseTo(1.8 * 0.76);
+    expect(project(base, computeEffects(choices, { sex: '' }, { ...unknown, omega3: true })).lipids.tg).toBeCloseTo(1.8);
+  });
+});
+
+describe('applicability', () => {
+  it('marks habits the user already has', () => {
+    expect(applicability('smoking', { ...unknown, smoking: 'no' })).toBe('already');
+    expect(applicability('smoking', unknown)).toBe('available');
+    expect(applicability('alcohol', { ...unknown, alcohol: 'none' })).toBe('already');
+    expect(applicability('alcohol', { ...unknown, alcohol: 'occasional' })).toBe('partial');
+    expect(applicability('activity', { ...unknown, activity: 'high' })).toBe('already');
+    expect(applicability('activity', { ...unknown, activity: 'medium' })).toBe('partial');
+    expect(applicability('nuts', { ...unknown, nuts: true })).toBe('already');
+    expect(applicability('fiber', { ...unknown, oats: true })).toBe('already');
+    expect(applicability('weight', { ...unknown, nuts: true })).toBe('available');
+  });
+
+  it('removes effects of habits already in place', () => {
+    const effects = computeEffects(
+      { ...DEFAULT_CHOICES, nuts: true, quitSmoking: true },
+      { sex: '' },
+      { ...unknown, nuts: true, smoking: 'no' },
+    );
+    expect(effects.nuts.ldl).toBe(0);
+    expect(effects.smoking.hdl).toBe(0);
+  });
+});
+
+describe('project', () => {
+  it('returns the baseline when nothing is chosen', () => {
+    const p = project(base, computeEffects(DEFAULT_CHOICES, { sex: '' }, unknown));
+    expect(p.lipids.tc).toBeCloseTo(base.tc);
+    expect(p.lipids.ldl).toBeCloseTo(base.ldl);
+    expect(p.capped).toBe(false);
+  });
+
+  it('applies weight loss including the directly reported TC change', () => {
+    const p = project(base, computeEffects({ ...DEFAULT_CHOICES, weightKg: 10 }, { sex: '' }, unknown));
+    expect(p.lipids.tc).toBeCloseTo(5.7);
+    expect(p.lipids.ldl).toBeCloseTo(3.9);
+    expect(p.lipids.hdl).toBeCloseTo(1.39);
+  });
+
+  it('applies relative LDL changes (sterols) to baseline LDL', () => {
+    const p = project(base, computeEffects({ ...DEFAULT_CHOICES, sterols: true }, { sex: '' }, unknown));
+    expect(p.lipids.ldl).toBeCloseTo(4.1 * 0.92);
+    expect(p.lipids.tc).toBeCloseTo(6.2 - 4.1 * 0.08);
+  });
+
+  it('caps the combined diet LDL reduction at 30 %', () => {
+    const all = {
+      ...DEFAULT_CHOICES,
+      satFatG: 30,
+      sugarG: 50,
+      fiberG: 10,
+      sterols: true,
+      nuts: true,
+    };
+    const p = project({ ...base, ldl: 3 }, computeEffects(all, { sex: '' }, unknown));
+    expect(p.capped).toBe(true);
+    expect(p.lipids.ldl).toBeCloseTo(2.1);
+  });
+});

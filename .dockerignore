@@ -5,3 +5,6 @@ Dockerfile
 .kamal/
 config/deploy.yml
 Makefile
+**/node_modules
+apps/*/dist
+cholesterolis

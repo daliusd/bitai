@@ -8,3 +8,5 @@ Makefile
 **/node_modules
 apps/*/dist
 cholesterolis
+README.md
+LICENSE

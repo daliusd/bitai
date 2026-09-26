@@ -171,6 +171,17 @@ main {
   font-size: 0.85rem;
 }
 
+.github {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+}
+
+.github svg {
+  width: 1.1em;
+  height: 1.1em;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .masthead, main { animation: none; }
   .bit > a { transition: none; }

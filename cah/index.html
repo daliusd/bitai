@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+  <meta charset="utf-8">
+  <title>Kortos prieš žmogiškumą — Bitai</title>
+  <meta name="description" content="„Cards Against Humanity“ vertimas ir adaptacija lietuviškai: spausdinamos baltos ir juodos kortos (PDF, CSV).">
+  <meta name="author" content="Dalius Dobravolskas">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Mono:wght@400;500&family=Inter+Tight:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
+  <style>
+    .cah-hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 2.5rem;
+      align-items: end;
+    }
+
+    .cah-hero h1 {
+      font-size: clamp(2.6rem, 8vw, 4.75rem);
+    }
+
+    /* Card preview */
+    .deal {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .hand {
+      position: relative;
+      width: 290px;
+      height: 250px;
+    }
+
+    .card {
+      position: absolute;
+      width: 170px;
+      height: 230px;
+      padding: 16px 16px 14px;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      font-family: 'Inter Tight', 'Helvetica Neue', Arial, sans-serif;
+      font-weight: 800;
+      font-size: 1.05rem;
+      line-height: 1.25;
+      overflow-wrap: anywhere;
+      transition: transform 0.35s ease, opacity 0.35s ease;
+    }
+
+    .card-black {
+      left: 0;
+      top: 0;
+      background: #141210;
+      color: #fff;
+      transform: rotate(-5deg);
+      box-shadow: 0 10px 24px rgba(20, 18, 16, 0.28);
+      z-index: 1;
+    }
+
+    .card-white {
+      right: 0;
+      bottom: 0;
+      background: #fff;
+      color: #141210;
+      border: 1px solid var(--border);
+      transform: rotate(4deg);
+      box-shadow: 0 10px 24px rgba(154, 100, 20, 0.16);
+      z-index: 2;
+    }
+
+    .card-foot {
+      font-family: 'DM Mono', monospace;
+      font-weight: 500;
+      font-size: 0.62rem;
+      letter-spacing: 0.04em;
+      opacity: 0.75;
+    }
+
+    .hand.dealing .card { opacity: 0; }
+    .hand.dealing .card-black { transform: rotate(-12deg) translateY(10px); }
+    .hand.dealing .card-white { transform: rotate(12deg) translateY(10px); }
+
+    .deal-btn {
+      font: inherit;
+      font-size: 0.85rem;
+      padding: 0.35rem 0.9rem;
+      background: var(--surface);
+      color: var(--accent-h);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      cursor: pointer;
+      transition: border-color 0.2s ease, color 0.2s ease;
+    }
+
+    .deal-btn:hover { border-color: var(--accent); }
+    .deal-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+    /* Content */
+    .cah-main {
+      display: grid;
+      gap: 3rem;
+    }
+
+    .cah-main section > h2 {
+      font-size: 1.9rem;
+      font-style: italic;
+      margin-bottom: 0.75rem;
+    }
+
+    .cah-main p {
+      max-width: 42em;
+      margin: 0 0 1rem;
+    }
+
+    .warning {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      max-width: 48em;
+      padding: 1.1rem 1.25rem;
+      background: var(--tint);
+      border-left: 4px solid var(--accent);
+      border-radius: 4px;
+    }
+
+    .warning p { margin: 0; }
+
+    .age {
+      flex: none;
+      display: grid;
+      place-items: center;
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+      background: #141210;
+      color: #fff;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .files {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px;
+    }
+
+    .files a {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      height: 100%;
+      padding: 0.9rem 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      text-decoration: none;
+      transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .files a:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(154, 100, 20, 0.12);
+    }
+
+    .swatch {
+      flex: none;
+      width: 30px;
+      height: 40px;
+      border-radius: 4px;
+      border: 1px solid #141210;
+    }
+
+    .swatch-white { background: #fff; }
+    .swatch-black { background: #141210; }
+    .swatch-draft { background: repeating-linear-gradient(45deg, #fff 0 4px, var(--border) 4px 6px); }
+
+    .file-name {
+      display: block;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.35rem;
+      font-weight: 600;
+      line-height: 1.15;
+    }
+
+    .file-meta {
+      display: block;
+      color: var(--muted);
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .cah-main .file-group {
+      margin: 1.25rem 0 0.6rem;
+      color: var(--muted);
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .asks {
+      margin: 0 0 1rem;
+      padding-left: 1.2em;
+    }
+
+    .note {
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 720px) {
+      .cah-hero { grid-template-columns: 1fr; gap: 2rem; }
+      .deal { justify-self: center; }
+    }
+
+    @media (max-width: 340px) {
+      .hand { transform: scale(0.9); transform-origin: top center; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .card, .files a { transition: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header class="masthead">
+      <p class="kicker"><a href="https://ffff.lt">ffff.lt</a> / <a href="/">bitai</a> / cah</p>
+      <div class="cah-hero">
+        <div>
+          <h1>Kortos prieš žmogiškumą</h1>
+          <p class="lede">
+            Mano bandymas išversti ir adaptuoti lietuvių kalbai bei aplinkai žaidimą
+            „<a href="https://cardsagainsthumanity.com/">Cards Against Humanity</a>“.
+            Apie patį žaidimą daugiau skaitykite angliškai — šis puslapis skirtas vertimui ir adaptavimui.
+          </p>
+        </div>
+        <div class="deal">
+          <div class="hand" id="hand" aria-live="polite">
+            <div class="card card-black">
+              <span id="black-text">Kas čia per kvapas?</span>
+              <span class="card-foot">Kortos prieš žmogiškumą</span>
+            </div>
+            <div class="card card-white">
+              <span id="white-text">Neskraidantys paukščiai.</span>
+              <span class="card-foot">Kortos prieš žmogiškumą</span>
+            </div>
+          </div>
+          <button class="deal-btn" id="deal" type="button" hidden>Traukti kitas kortas ↻</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="cah-main">
+      <div class="warning" role="note">
+        <span class="age">N-18</span>
+        <p>
+          <strong>Perspėjimas.</strong> Jei nežinote, kas yra „Kortos prieš žmogiškumą“, iškart perspėju: tai N-18.
+          Žaidimas gali priversti pasijausti nepatogiai ar net įžeisti. Jei nesate tam nuotaikoje,
+          toliau geriau nesigilinkite.
+        </p>
+      </div>
+
+      <section>
+        <h2>Atsisiųsti</h2>
+        <p class="file-group">Paruošta spausdinti</p>
+        <ul class="files">
+          <li><a href="baltos.pdf" download>
+            <span class="swatch swatch-white"></span>
+            <span><span class="file-name">Baltos kortos</span><span class="file-meta">PDF · 153 KB</span></span>
+          </a></li>
+          <li><a href="juodos.pdf" download>
+            <span class="swatch swatch-black"></span>
+            <span><span class="file-name">Juodos kortos</span><span class="file-meta">PDF · 83 KB</span></span>
+          </a></li>
+        </ul>
+        <p class="file-group">Vertimai (CSV, anglų ir lietuvių kalbomis)</p>
+        <ul class="files">
+          <li><a href="baltos.csv">
+            <span class="swatch swatch-white"></span>
+            <span><span class="file-name">Baltos</span><span class="file-meta">CSV · 400 kortų</span></span>
+          </a></li>
+          <li><a href="juodos.csv">
+            <span class="swatch swatch-black"></span>
+            <span><span class="file-name">Juodos</span><span class="file-meta">CSV · 96 kortos</span></span>
+          </a></li>
+          <li><a href="baltos_nt.csv">
+            <span class="swatch swatch-draft"></span>
+            <span><span class="file-name">Baltos neišverstos</span><span class="file-meta">CSV · 66 kortos</span></span>
+          </a></li>
+          <li><a href="juodos_nt.csv">
+            <span class="swatch swatch-draft"></span>
+            <span><span class="file-name">Juodos neišverstos</span><span class="file-meta">CSV · 3 kortos</span></span>
+          </a></li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Spausdinimas</h2>
+        <p>
+          Spausdinkite ant storo (pvz., 280 g/m²) balto popieriaus — juodas kortas taip pat.
+          Tokio storio ir kokybės žaidimui visiškai pakanka.
+        </p>
+        <p class="note">
+          2014 m. „CopyPro“ lapą atspausdindavo už 1 Lt, tad visi PDF kainuodavo apie 31 Lt.
+        </p>
+      </section>
+
+      <section>
+        <h2>Apie vertimą</h2>
+        <p>
+          Verčiau pakankamai laisvai. Nemažai dalykų neišsiverčia, nes angliškai turi daugiau nei vieną
+          prasmę, o kai kurios prasmės gana subtilios (kai ką vis tiek išverčiau, bet jei teks aiškinti…).
+        </p>
+        <p>Su žmonių pavardėmis elgiausi taip:</p>
+        <ul class="asks">
+          <li>jei, mano nuomone, tai žinomas asmuo — neverčiau;</li>
+          <li>kartais pavardę išverčiau, nes kai kurias pavardes įprasta versti, kartais — ne;</li>
+          <li>kartais vietoje angliškos pavardės įrašiau lietuvį, nes tarp šių asmenų yra kažkokių
+            žmogiškų panašumų (dažniausiai dėl to, kad lietuviai nesibodi plagijuoti).</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Parašykite man</h2>
+        <p>Peržiūrėkite ir parašykite, jei:</p>
+        <ul class="asks">
+          <li>vertimas blogas — pasiūlykite geresnį;</li>
+          <li>pastebėjote kokią nors klaidą;</li>
+          <li>turite pasiūlymą lietuviškai kortai;</li>
+          <li>šiaip liūdna.</li>
+        </ul>
+        <p>
+          Rašykite: <a href="mailto:dalius.dobravolskas@gmail.com">dalius.dobravolskas@gmail.com</a>.
+          Šia nuoroda dalinkitės su kuo norite.
+        </p>
+      </section>
+    </main>
+
+    <footer class="colophon">
+      <span>2014–2026 &copy; <a href="https://ffff.lt">ffff.lt</a></span>
+      <span><a href="/">← Visi bitai</a></span>
+      <span>Dalius Dobravolskas</span>
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      var hand = document.getElementById('hand');
+      var btn = document.getElementById('deal');
+      var blackEl = document.getElementById('black-text');
+      var whiteEl = document.getElementById('white-text');
+      var decks = {};
+
+      function load(name) {
+        return fetch(name + '.csv')
+          .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
+          .then(function (text) {
+            return text.split('\n').slice(1).map(function (line) {
+              var lt = (line.split(';')[1] || '').trim();
+              return lt.replace(/\s+([?!.,])/g, '$1');
+            }).filter(Boolean);
+          });
+      }
+
+      function pick(list) {
+        return list[Math.floor(Math.random() * list.length)];
+      }
+
+      function deal() {
+        hand.classList.add('dealing');
+        setTimeout(function () {
+          var b = pick(decks.black);
+          var w = pick(decks.white);
+          blackEl.textContent = b.replace(/_{2,}/g, '______');
+          whiteEl.textContent = /[.!?]$/.test(w) ? w : w + '.';
+          hand.classList.remove('dealing');
+        }, 250);
+      }
+
+      Promise.all([load('juodos'), load('baltos')])
+        .then(function (res) {
+          decks.black = res[0];
+          decks.white = res[1];
+          btn.hidden = false;
+          btn.addEventListener('click', deal);
+        })
+        .catch(function () { /* leave the static example in place */ });
+    })();
+  </script>
+
+</body>
+</html>

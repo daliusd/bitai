@@ -11,6 +11,7 @@ Live at **https://bitai.ffff.lt** (the site itself is in Lithuanian).
 | --- | --- |
 | `index.html`, `css/`, `images/` | Landing page listing all tools |
 | `pasaulines-investicijos/` | Global investments by sector visualization (static HTML) |
+| `cah/` | Lithuanian translation of Cards Against Humanity: printable PDFs, CSVs and the Scribus scripts that generate the cards |
 | `apps/cholesterolis/` | Science-based cholesterol calculator (React + TypeScript + Vite) |
 | `apps/kraujospudis/` | Science-based blood pressure calculator (React + TypeScript + Vite) |
 | `up/` | Health check endpoint used by Kamal |

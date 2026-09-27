@@ -15,6 +15,7 @@ Live at **https://bitai.ffff.lt** (the site itself is in Lithuanian).
 | `apps/cholesterolis/` | Science-based cholesterol calculator (React + TypeScript + Vite) |
 | `apps/kraujospudis/` | Science-based blood pressure calculator (React + TypeScript + Vite) |
 | `apps/laikmatis/` | Interval training timer with voice cues (React + TypeScript + Vite) |
+| `apps/ryskumo-gylis/` | Depth of field visualization with a 3D blur view, in Lithuanian and English (`?lang=en`) (React + TypeScript + Vite) |
 | `up/` | Health check endpoint used by Kamal |
 
 ## Development
@@ -23,14 +24,14 @@ Requires Node.js 22+.
 
 ```sh
 make run     # serve the repo at http://localhost:9876
-make build   # build the React apps into ./cholesterolis, ./kraujospudis and ./laikmatis
+make build   # build the React apps into ./cholesterolis, ./kraujospudis, ./laikmatis and ./ryskumo-gylis
 make test    # run the React apps' tests (Vitest)
 ```
 
 To work on an app with hot reload:
 
 ```sh
-cd apps/cholesterolis   # or apps/kraujospudis, apps/laikmatis
+cd apps/cholesterolis   # or apps/kraujospudis, apps/laikmatis, apps/ryskumo-gylis
 npm install
 npm run dev
 ```

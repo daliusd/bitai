@@ -4,7 +4,6 @@ export interface Source {
 }
 
 const pubmed = (id: string) => `https://pubmed.ncbi.nlm.nih.gov/${id}/`;
-const doi = (id: string) => `https://doi.org/${id}`;
 
 export const SOURCES = {
   esc2024: {
@@ -13,7 +12,7 @@ export const SOURCES = {
   },
   stergiou2021: {
     label: 'Stergiou G.S. ir kt. 2021 ESH kraujospūdžio matavimo gydytojo kabinete ir namuose rekomendacijos. J Hypertens, 2021',
-    url: doi('10.1097/HJH.0000000000002843'),
+    url: pubmed('33710173'),
   },
   kallioinen2017: {
     label: 'Kallioinen N. ir kt. Kraujospūdžio matavimo netikslumų šaltiniai: sisteminė apžvalga. J Hypertens, 2017',
@@ -29,7 +28,7 @@ export const SOURCES = {
   },
   filippini2021: {
     label: 'Filippini T. ir kt. Natrio mažinimo poveikis kraujospūdžiui: dozės ir atsako metaanalizė. Circulation, 2021',
-    url: doi('10.1161/CIRCULATIONAHA.120.050371'),
+    url: pubmed('33586450'),
   },
   yin2022: {
     label: 'Yin X. ir kt. Druskos pakaitalų poveikis kraujospūdžiui ir klinikinėms baigtims: 21 tyrimo metaanalizė. Heart, 2022',
@@ -61,6 +60,6 @@ export const SOURCES = {
   },
   bplttc2021: {
     label: 'Blood Pressure Lowering Treatment Trialists’ Collaboration. Kraujospūdžio mažinimas vaistais esant įvairiam kraujospūdžiui: 48 tyrimų metaanalizė. Lancet, 2021',
-    url: pubmed('33933206'),
+    url: pubmed('33933205'),
   },
 } satisfies Record<string, Source>;

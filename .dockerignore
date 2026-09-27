@@ -9,5 +9,6 @@ Makefile
 apps/*/dist
 cholesterolis
 kraujospudis
+laikmatis
 README.md
 LICENSE

@@ -1,0 +1,337 @@
+:root {
+  --bg: #f1f2f8;
+  --surface: #ffffff;
+  --surface-active: #e3e5f2;
+  --ink: #1a1a2e;
+  --muted: #5d6078;
+  --faint: #8a8da3;
+  --line: #d6d8e6;
+  --shadow: 0 1px 3px rgba(26, 26, 46, 0.08);
+  --start: linear-gradient(135deg, #22c55e, #16a34a);
+  --focus: #16a34a;
+  --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  color-scheme: light;
+}
+
+/* Dark tokens: the system preference unless the visitor chose light, or an explicit dark choice. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #1a1a2e;
+    --surface: #2a2a4a;
+    --surface-active: #3a3a5a;
+    --ink: #ffffff;
+    --muted: #8a8aa0;
+    --faint: #5c5c78;
+    --line: #34345a;
+    --shadow: none;
+    --focus: #22c55e;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --bg: #1a1a2e;
+  --surface: #2a2a4a;
+  --surface-active: #3a3a5a;
+  --ink: #ffffff;
+  --muted: #8a8aa0;
+  --faint: #5c5c78;
+  --line: #34345a;
+  --shadow: none;
+  --focus: #22c55e;
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  touch-action: manipulation;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+a {
+  color: inherit;
+  text-underline-offset: 3px;
+}
+
+button {
+  font: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 20px;
+}
+
+/* Setup screen */
+
+.setup-screen {
+  justify-content: flex-start;
+  gap: 20px;
+  padding-top: 40px;
+  padding-bottom: 40px;
+}
+
+.crumbs {
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+  color: var(--muted);
+  margin-bottom: -12px;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 5px;
+  text-align: center;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+  max-width: 280px;
+}
+
+.input-label {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.drag-input {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  border-radius: 12px;
+  cursor: ns-resize;
+  user-select: none;
+  -webkit-user-select: none;
+  /* The drag itself scrolls the value, not the page. */
+  touch-action: none;
+  transition: transform 0.1s, background 0.2s;
+}
+
+.drag-input:active {
+  transform: scale(1.02);
+  background: var(--surface-active);
+}
+
+.drag-input .value {
+  font-size: 2rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.drag-hint {
+  font-size: 0.75rem;
+  color: var(--faint);
+  margin-top: 5px;
+  text-align: center;
+}
+
+.total {
+  font-size: 0.9rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.start-btn {
+  width: 100%;
+  max-width: 280px;
+  padding: 18px;
+  font-size: 1.4rem;
+  font-weight: 700;
+  background: var(--start);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  margin-top: 5px;
+  transition: transform 0.1s, opacity 0.2s;
+}
+
+.start-btn:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+
+.start-btn:disabled {
+  opacity: 0.7;
+  cursor: progress;
+}
+
+.theme-toggle {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: transform 0.1s, background 0.2s;
+}
+
+.theme-toggle:active {
+  transform: scale(0.95);
+}
+
+/* Timer screen: the phase colours are the signal, so they stay the same in both themes. */
+
+.timer-screen {
+  color: #fff;
+  transition: background-color 0.3s;
+}
+
+.prepare-phase {
+  background: linear-gradient(180deg, #d97706 0%, #b45309 100%);
+}
+
+.active-phase {
+  background: linear-gradient(180deg, #166534 0%, #14532d 100%);
+}
+
+.rest-phase {
+  background: linear-gradient(180deg, #1e40af 0%, #1e3a8a 100%);
+}
+
+.done-phase {
+  background: linear-gradient(180deg, #4b5563 0%, #1f2937 100%);
+}
+
+.interval-indicator {
+  font-size: 1.2rem;
+  opacity: 0.9;
+  margin-bottom: 10px;
+}
+
+.phase-label {
+  font-size: 2rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  margin-bottom: 20px;
+}
+
+.countdown {
+  font-size: min(8rem, 36vw);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+@media (min-height: 700px) {
+  .countdown {
+    font-size: min(10rem, 36vw);
+  }
+}
+
+@media (min-height: 800px) {
+  .countdown {
+    font-size: min(12rem, 36vw);
+  }
+}
+
+@media (max-width: 380px) {
+  .control-btn {
+    padding: 16px 28px;
+  }
+}
+
+.controls {
+  display: flex;
+  gap: 20px;
+  margin-top: 50px;
+}
+
+.control-btn {
+  padding: 18px 40px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.1s, opacity 0.2s;
+}
+
+.control-btn:active {
+  transform: scale(0.95);
+}
+
+.control-btn:disabled {
+  opacity: 0.5;
+}
+
+.pause-btn {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.stop-btn {
+  background: rgba(239, 68, 68, 0.8);
+}
+
+.timer-screen :focus-visible {
+  outline-color: #fff;
+}
+
+.paused .countdown {
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .paused .countdown {
+    animation: none;
+    opacity: 0.6;
+  }
+}

@@ -14,6 +14,7 @@ Live at **https://bitai.ffff.lt** (the site itself is in Lithuanian).
 | `cah/` | Lithuanian translation of Cards Against Humanity: printable PDFs, CSVs and the Scribus scripts that generate the cards |
 | `apps/cholesterolis/` | Science-based cholesterol calculator (React + TypeScript + Vite) |
 | `apps/kraujospudis/` | Science-based blood pressure calculator (React + TypeScript + Vite) |
+| `apps/laikmatis/` | Interval training timer with voice cues (React + TypeScript + Vite) |
 | `up/` | Health check endpoint used by Kamal |
 
 ## Development
@@ -22,14 +23,14 @@ Requires Node.js 22+.
 
 ```sh
 make run     # serve the repo at http://localhost:9876
-make build   # build the calculators into ./cholesterolis and ./kraujospudis
-make test    # run the calculators' tests (Vitest)
+make build   # build the React apps into ./cholesterolis, ./kraujospudis and ./laikmatis
+make test    # run the React apps' tests (Vitest)
 ```
 
-To work on a calculator with hot reload:
+To work on an app with hot reload:
 
 ```sh
-cd apps/cholesterolis   # or apps/kraujospudis
+cd apps/cholesterolis   # or apps/kraujospudis, apps/laikmatis
 npm install
 npm run dev
 ```

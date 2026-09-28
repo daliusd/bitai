@@ -3,7 +3,7 @@ import type { Body, Lifestyle, Lipids, Marker, Unit } from '../lib/types';
 import type { Status } from '../lib/reference';
 import Priorities from './Priorities';
 import type { ActivityTarget, Choices, Effect, FatReplacement, InterventionId, Omega3Dose } from '../lib/interventions';
-import { MAX_FIBER_G, WEIGHT_REFERENCE_KG, applicability } from '../lib/interventions';
+import { MAX_FIBER_G, PER_WEIGHT_PCT, WEIGHT_REFERENCE_KG, applicability } from '../lib/interventions';
 import { bmi, energyNeed } from '../lib/body';
 import { formatNumber } from '../lib/units';
 import { SOURCES } from '../lib/sources';
@@ -70,14 +70,17 @@ export default function Interventions({ choices, onChange, effects, body, lifest
       body: (
         <>
           <p>
-            70 tyrimų metaanalizė parodė, kad kiekvienas numestas kilogramas vidutiniškai sumažina bendrąjį
-            cholesterolį 0,05 mmol/l, MTL – 0,02 mmol/l, trigliceridus – 0,015 mmol/l, o DTL, svoriui
-            stabilizavusis, padidėja 0,009 mmol/l. Didžiausia nauda – turint antsvorio.
+            73 atsitiktinių imčių tyrimų metaanalizė (32 496 dalyviai) parodė, kad po 6–12 mėnesių mitybos ir
+            fizinio aktyvumo programų numetus 10 % svorio MTL vidutiniškai sumažėja{' '}
+            {formatNumber(-PER_WEIGHT_PCT.ldl * 10, 2)} mmol/l, trigliceridai –{' '}
+            {formatNumber(-PER_WEIGHT_PCT.tg * 10, 2)} mmol/l, o DTL padidėja{' '}
+            {formatNumber(PER_WEIGHT_PCT.hdl * 10, 2)} mmol/l.
           </p>
           <p>
             Svarbu ne tiek kilogramai, kiek dalis kūno svorio: 6 kg 60 kg žmogui yra tiek pat, kiek 9 kg 90 kg
-            žmogui. Todėl poveikis skaičiuojamas nuo numesto svorio procento, laikant, kad tipinis tyrimų dalyvis
-            svėrė apie {WEIGHT_REFERENCE_KG} kg (1 % ≈ {formatNumber(WEIGHT_REFERENCE_KG / 100, 2)} kg).
+            žmogui. Todėl poveikis skaičiuojamas nuo numesto svorio procento. Tyrimų dalyviai svėrė vidutiniškai{' '}
+            {formatNumber(WEIGHT_REFERENCE_KG, 1)} kg (kūno masės indeksas 36,3), todėl 1 % jiems – apie{' '}
+            {formatNumber(WEIGHT_REFERENCE_KG / 100, 1)} kg.
           </p>
           {maxWeightLossPct === 0 ? (
             <p className="note">Jūsų kūno masės indeksas jau artimas 18,5 – svorio metimo nesiūlome.</p>
@@ -96,12 +99,13 @@ export default function Interventions({ choices, onChange, effects, body, lifest
           ) : null}
         </>
       ),
-      sources: [SOURCES.dattilo1992, SOURCES.zomer2016],
+      sources: [SOURCES.hasan2020, SOURCES.dattilo1992, SOURCES.zomer2016],
       limitations: [
-        'Poveikis matuojamas, kai svoris jau stabilizavosi. Kol svoris krenta, DTL gali laikinai sumažėti.',
+        'Kol svoris krenta, DTL gali laikinai sumažėti; padidėja, kai svoris stabilizuojasi (Dattilo 1992).',
         'Priaugus svorio atgal, rodikliai grįžta.',
         'Esant normaliam svoriui, svorio metimas nerekomenduojamas; slankiklis neleidžia nukristi žemiau KMI 18,5.',
-        `Tyrimuose poveikis matuotas kilogramais; perskaičiavimas į procentus remiasi prielaida, kad tyrimų dalyvis svėrė apie ${WEIGHT_REFERENCE_KG} kg.`,
+        'Tyrimuose poveikis matuotas kilogramais; į procentus perskaičiuota pagal vidutinį dalyvių svorį, o ne pagal kiekvieno žmogaus duomenis.',
+        'Dalyvių vidutinis kūno masės indeksas buvo 36,3 (nutukimas); esant mažesniam antsvoriui poveikis gali būti mažesnis.',
       ],
     },
     {

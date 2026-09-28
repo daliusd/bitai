@@ -74,18 +74,17 @@ export type InterventionId =
 /** Interventions whose LDL effect comes from diet composition (subject to the combined cap). */
 const DIET_IDS: InterventionId[] = ['satFat', 'sugar', 'fiber', 'sterols', 'nuts'];
 
-// --- Weight loss: Dattilo & Kris-Etherton 1992, per kg lost at a stabilised weight.
-export const PER_KG = { tc: -0.05, ldl: -0.02, hdl: 0.009, tg: -0.015 };
+// --- Weight loss: Hasan 2020, 73 RCTs, lifestyle interventions, per kg lost at 6–12 months:
+// TG −4.0 mg/dL, LDL −1.28 mg/dL, HDL +0.46 mg/dL. TC is not reported, so it follows from the parts.
+export const PER_KG = { ldl: -1.28 / 38.67, hdl: 0.46 / 38.67, tg: -4.0 / 88.57 };
 
 /**
- * The trials enrolled mostly people with overweight, so a kilogram means more to a light
- * person than to a heavy one. The per-kg values are restated per 1 % of body weight for a
- * typical trial participant of this weight (an assumption, not a figure from the study).
+ * A kilogram means more to a light person than to a heavy one, so the per-kg values are
+ * restated per 1 % of body weight of the trials' participants (mean 101.6 kg, BMI 36.3).
  */
-export const WEIGHT_REFERENCE_KG = 85;
+export const WEIGHT_REFERENCE_KG = 101.6;
 
 export const PER_WEIGHT_PCT = {
-  tc: (PER_KG.tc * WEIGHT_REFERENCE_KG) / 100,
   ldl: (PER_KG.ldl * WEIGHT_REFERENCE_KG) / 100,
   hdl: (PER_KG.hdl * WEIGHT_REFERENCE_KG) / 100,
   tg: (PER_KG.tg * WEIGHT_REFERENCE_KG) / 100,
@@ -94,7 +93,7 @@ export const PER_WEIGHT_PCT = {
 /** Effect of losing `pct` % of body weight. */
 export function weightEffect(pct: number): Effect {
   const p = PER_WEIGHT_PCT;
-  return { tc: p.tc * pct, ldl: p.ldl * pct, hdl: p.hdl * pct, tg: p.tg * pct };
+  return { ldl: p.ldl * pct, hdl: p.hdl * pct, tg: p.tg * pct };
 }
 
 // --- Saturated fat: Mensink 2016 (WHO), per 1 % of energy of SFA replaced.

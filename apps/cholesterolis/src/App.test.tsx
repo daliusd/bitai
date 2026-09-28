@@ -77,7 +77,7 @@ describe('App', () => {
     await enterPanel({ tc: '6,2', hdl: '1,3', ldl: '4,1', tg: '1,8' });
     fireEvent.change(screen.getByRole('slider', { name: 'Kiek procentų svorio numesti' }), { target: { value: '20' } });
     expect(projectionOf('tc').getByText('5,35')).toBeInTheDocument();
-    expect(projectionOf('ldl').getByText('3,76')).toBeInTheDocument();
+    expect(projectionOf('ldl').getByText('3,43')).toBeInTheDocument();
     expect(within(lever(/Svorio metimas/)).getByTestId('effect')).toHaveTextContent('BCH −0,85 mmol/l');
   });
 

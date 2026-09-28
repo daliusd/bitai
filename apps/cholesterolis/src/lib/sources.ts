@@ -18,6 +18,10 @@ export const SOURCES = {
     label: 'Dattilo A.M., Kris-Etherton P.M. Svorio mažinimo poveikis kraujo lipidams: metaanalizė (70 tyrimų). Am J Clin Nutr, 1992',
     url: pubmed('1386186'),
   },
+  hasan2020: {
+    label: 'Hasan B. ir kt. Svorio mažinimas ir kraujo lipidai antsvorio ir nutukimo atveju: 73 atsitiktinių imčių tyrimų metaanalizė. J Clin Endocrinol Metab, 2020',
+    url: pubmed('32954416'),
+  },
   zomer2016: {
     label: 'Zomer E. ir kt. Svorio mažinimo intervencijos ir širdies bei kraujagyslių rizikos veiksniai: metaanalizė. Obes Rev, 2016',
     url: pubmed('27324830'),

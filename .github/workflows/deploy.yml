@@ -1,0 +1,57 @@
+# Manual deploy. Does what `make deploy` does on a laptop, with the one thing a
+# laptop has and a runner does not: the SSH key that reaches the server.
+# `.kamal/secrets` is empty, so there is nothing else to supply.
+#
+# No registry credentials: config/deploy.yml points at localhost:5555, so Kamal
+# boots a registry container here on the runner, pushes the image to it, and
+# reverse-forwards the port over the same SSH connection it deploys with. The
+# server pulls through that tunnel. Nothing about the image leaves this job.
+#
+# The apps' tests run inside the Docker build (see Dockerfile), so a failing
+# test fails the deploy before anything reaches the server.
+name: Deploy
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      # Kamal tags the image with the commit, so it needs a real checkout, not
+      # an export. actions/checkout gives one; nothing more to do here.
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+
+      - name: Install Kamal
+        # ed25519 and bcrypt_pbkdf are what let Net::SSH speak to an ed25519
+        # host key at all; without them it neither offers the algorithm nor
+        # reads the matching known_hosts line, and the server's ed25519 key
+        # goes unrecognised.
+        # The version goes on the gem rather than in -v, which RubyGems
+        # refuses to apply to more than one gem at a time.
+        run: gem install "kamal:~> 2.0" ed25519 bcrypt_pbkdf --no-document
+
+      - name: Authorize the server
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          # Scanned per run rather than pinned, so a rebuilt server needs no
+          # change here. Unhashed on purpose: Net::SSH matches a hashed entry
+          # by HMAC and a plain one by string comparison, and the hashed path
+          # did not match the server's ed25519 key. Do not add -H.
+          ssh-keyscan 195.201.143.78 >> ~/.ssh/known_hosts
+
+      - name: Deploy
+        run: kamal deploy

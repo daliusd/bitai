@@ -45,6 +45,10 @@ during the build) and deployed with [Kamal](https://kamal-deploy.org):
 make deploy
 ```
 
+Or run the **Deploy** workflow from the GitHub Actions tab (manual trigger). It
+needs an `SSH_PRIVATE_KEY` repository secret holding a key that can reach the
+server.
+
 Configuration lives in `config/deploy.yml`.
 
 ## License

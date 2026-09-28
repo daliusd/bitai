@@ -29,7 +29,7 @@ export type ActivityTarget = 'none' | '150' | '300';
 export type Omega3Dose = 0 | 1 | 2 | 4;
 
 export interface Choices {
-  weightKg: number;
+  weightPct: number;
   satFatG: number;
   satFatReplacement: FatReplacement;
   sugarG: number;
@@ -44,7 +44,7 @@ export interface Choices {
 }
 
 export const DEFAULT_CHOICES: Choices = {
-  weightKg: 0,
+  weightPct: 0,
   satFatG: 0,
   satFatReplacement: 'pufa',
   sugarG: 0,
@@ -77,8 +77,24 @@ const DIET_IDS: InterventionId[] = ['satFat', 'sugar', 'fiber', 'sterols', 'nuts
 // --- Weight loss: Dattilo & Kris-Etherton 1992, per kg lost at a stabilised weight.
 export const PER_KG = { tc: -0.05, ldl: -0.02, hdl: 0.009, tg: -0.015 };
 
-export function weightEffect(kg: number): Effect {
-  return { tc: PER_KG.tc * kg, ldl: PER_KG.ldl * kg, hdl: PER_KG.hdl * kg, tg: PER_KG.tg * kg };
+/**
+ * The trials enrolled mostly people with overweight, so a kilogram means more to a light
+ * person than to a heavy one. The per-kg values are restated per 1 % of body weight for a
+ * typical trial participant of this weight (an assumption, not a figure from the study).
+ */
+export const WEIGHT_REFERENCE_KG = 85;
+
+export const PER_WEIGHT_PCT = {
+  tc: (PER_KG.tc * WEIGHT_REFERENCE_KG) / 100,
+  ldl: (PER_KG.ldl * WEIGHT_REFERENCE_KG) / 100,
+  hdl: (PER_KG.hdl * WEIGHT_REFERENCE_KG) / 100,
+  tg: (PER_KG.tg * WEIGHT_REFERENCE_KG) / 100,
+};
+
+/** Effect of losing `pct` % of body weight. */
+export function weightEffect(pct: number): Effect {
+  const p = PER_WEIGHT_PCT;
+  return { tc: p.tc * pct, ldl: p.ldl * pct, hdl: p.hdl * pct, tg: p.tg * pct };
 }
 
 // --- Saturated fat: Mensink 2016 (WHO), per 1 % of energy of SFA replaced.
@@ -212,7 +228,7 @@ export function computeEffects(
   lifestyle: Lifestyle,
 ): Record<InterventionId, Effect> {
   const effects: Record<InterventionId, Effect> = {
-    weight: weightEffect(choices.weightKg),
+    weight: weightEffect(choices.weightPct),
     satFat: satFatEffect(choices.satFatG, choices.satFatReplacement, energyNeed(body)),
     sugar: sugarEffect(choices.sugarG),
     fiber: fiberEffect(choices.fiberG),

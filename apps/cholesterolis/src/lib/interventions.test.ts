@@ -30,12 +30,13 @@ const unknown: Lifestyle = {
 const base: Lipids = { tc: 6.2, ldl: 4.1, hdl: 1.3, tg: 1.8 };
 
 describe('single interventions', () => {
-  it('weight loss follows Dattilo 1992 per-kg values', () => {
-    const e = weightEffect(10);
-    expect(e.ldl).toBeCloseTo(-0.2);
-    expect(e.hdl).toBeCloseTo(0.09);
-    expect(e.tg).toBeCloseTo(-0.15);
-    expect(e.tc).toBeCloseTo(-0.5);
+  it('weight loss restates Dattilo 1992 per-kg values per % of an 85 kg body', () => {
+    // 20 % of 85 kg = 17 kg
+    const e = weightEffect(20);
+    expect(e.ldl).toBeCloseTo(-0.34);
+    expect(e.hdl).toBeCloseTo(0.153);
+    expect(e.tg).toBeCloseTo(-0.255);
+    expect(e.tc).toBeCloseTo(-0.85);
   });
 
   it('saturated fat converts grams to energy percent', () => {
@@ -131,10 +132,10 @@ describe('project', () => {
   });
 
   it('applies weight loss including the directly reported TC change', () => {
-    const p = project(base, computeEffects({ ...DEFAULT_CHOICES, weightKg: 10 }, { sex: '' }, unknown));
-    expect(p.lipids.tc).toBeCloseTo(5.7);
-    expect(p.lipids.ldl).toBeCloseTo(3.9);
-    expect(p.lipids.hdl).toBeCloseTo(1.39);
+    const p = project(base, computeEffects({ ...DEFAULT_CHOICES, weightPct: 20 }, { sex: '' }, unknown));
+    expect(p.lipids.tc).toBeCloseTo(5.35);
+    expect(p.lipids.ldl).toBeCloseTo(3.76);
+    expect(p.lipids.hdl).toBeCloseTo(1.453);
   });
 
   it('applies relative LDL changes (sterols) to baseline LDL', () => {

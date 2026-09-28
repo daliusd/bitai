@@ -14,8 +14,8 @@ describe('storage', () => {
   });
 
   it('merges stored objects with defaults so new fields keep defaults', () => {
-    writeStored('choices', { weightKg: 5 });
-    expect(readStored('choices', { weightKg: 0, lowCarb: false })).toEqual({ weightKg: 5, lowCarb: false });
+    writeStored('choices', { weightPct: 5 });
+    expect(readStored('choices', { weightPct: 0, lowCarb: false })).toEqual({ weightPct: 5, lowCarb: false });
   });
 
   it('falls back to the default on corrupt or mismatched data', () => {

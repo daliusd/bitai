@@ -3,8 +3,9 @@ import type { Body, Lifestyle, Lipids, Marker, Unit } from '../lib/types';
 import type { Status } from '../lib/reference';
 import Priorities from './Priorities';
 import type { ActivityTarget, Choices, Effect, FatReplacement, InterventionId, Omega3Dose } from '../lib/interventions';
-import { MAX_FIBER_G, applicability } from '../lib/interventions';
-import { energyNeed } from '../lib/body';
+import { MAX_FIBER_G, WEIGHT_REFERENCE_KG, applicability } from '../lib/interventions';
+import { bmi, energyNeed } from '../lib/body';
+import { formatNumber } from '../lib/units';
 import { SOURCES } from '../lib/sources';
 import type { Source } from '../lib/sources';
 import InterventionSection, { SourceList } from './InterventionSection';
@@ -18,7 +19,7 @@ interface Props {
   effects: Record<InterventionId, Effect>;
   body: Body;
   lifestyle: Lifestyle;
-  maxWeightLoss: number;
+  maxWeightLossPct: number;
   unit: Unit;
   base?: Lipids;
   statuses: Partial<Record<Marker, Status>>;
@@ -37,7 +38,7 @@ interface Lever {
 
 const grams = (v: number) => `${v} g per dieną`;
 
-export default function Interventions({ choices, onChange, effects, body, lifestyle, maxWeightLoss, unit, base, statuses }: Props) {
+export default function Interventions({ choices, onChange, effects, body, lifestyle, maxWeightLossPct, unit, base, statuses }: Props) {
   const set = <K extends keyof Choices>(key: K, v: Choices[K]) => onChange({ ...choices, [key]: v });
   const kcal = energyNeed(body);
   const whom = body.weight && body.height && body.age ? `Jums (apie ${kcal} kcal per dieną)` : `Vidutiniam suaugusiajam (${kcal} kcal per dieną)`;
@@ -46,6 +47,9 @@ export default function Interventions({ choices, onChange, effects, body, lifest
   const sugarLimit = Math.round((kcal * 0.1) / 4);
   const sugarIdeal = Math.round((kcal * 0.05) / 4);
   const activityPartial = applicability('activity', lifestyle) === 'partial';
+  const bmiValue = bmi(body);
+  const weightPctLabel = (v: number) =>
+    body.weight ? `${v} % (${formatNumber((body.weight * v) / 100, 1)} kg)` : `${v} %`;
 
   const levers: Lever[] = [
     {
@@ -56,11 +60,11 @@ export default function Interventions({ choices, onChange, effects, body, lifest
       control: (
         <Slider
           id="weight"
-          label="Kiek kilogramų numesti"
-          value={choices.weightKg}
-          max={maxWeightLoss}
-          format={(v) => `${v} kg`}
-          onChange={(v) => set('weightKg', v)}
+          label="Kiek procentų svorio numesti"
+          value={choices.weightPct}
+          max={maxWeightLossPct}
+          format={weightPctLabel}
+          onChange={(v) => set('weightPct', v)}
         />
       ),
       body: (
@@ -70,9 +74,26 @@ export default function Interventions({ choices, onChange, effects, body, lifest
             cholesterolį 0,05 mmol/l, MTL – 0,02 mmol/l, trigliceridus – 0,015 mmol/l, o DTL, svoriui
             stabilizavusis, padidėja 0,009 mmol/l. Didžiausia nauda – turint antsvorio.
           </p>
-          {maxWeightLoss === 0 && (
+          <p>
+            Svarbu ne tiek kilogramai, kiek dalis kūno svorio: 6 kg 60 kg žmogui yra tiek pat, kiek 9 kg 90 kg
+            žmogui. Todėl poveikis skaičiuojamas nuo numesto svorio procento, laikant, kad tipinis tyrimų dalyvis
+            svėrė apie {WEIGHT_REFERENCE_KG} kg (1 % ≈ {formatNumber(WEIGHT_REFERENCE_KG / 100, 2)} kg).
+          </p>
+          {maxWeightLossPct === 0 ? (
             <p className="note">Jūsų kūno masės indeksas jau artimas 18,5 – svorio metimo nesiūlome.</p>
-          )}
+          ) : bmiValue === undefined ? (
+            <p className="warning">
+              Šis poveikis nustatytas antsvorio turintiems žmonėms. Jei jūsų svoris normalus, svorio metimas
+              lipidus greičiausiai pakeis mažiau, nei rodoma. Įveskite svorį ir ūgį – pamatysite savo kūno masės
+              indeksą ir kiek kilogramų sudaro pasirinktas procentas.
+            </p>
+          ) : bmiValue < 25 ? (
+            <p className="warning">
+              Jūsų kūno masės indeksas {formatNumber(bmiValue, 1)} – normalus svoris. Tyrimuose dalyvavo daugiausia
+              antsvorio turintys žmonės; esant normaliam svoriui, svorio metimo poveikis lipidams greičiausiai
+              mažesnis, nei rodoma.
+            </p>
+          ) : null}
         </>
       ),
       sources: [SOURCES.dattilo1992, SOURCES.zomer2016],
@@ -80,6 +101,7 @@ export default function Interventions({ choices, onChange, effects, body, lifest
         'Poveikis matuojamas, kai svoris jau stabilizavosi. Kol svoris krenta, DTL gali laikinai sumažėti.',
         'Priaugus svorio atgal, rodikliai grįžta.',
         'Esant normaliam svoriui, svorio metimas nerekomenduojamas; slankiklis neleidžia nukristi žemiau KMI 18,5.',
+        `Tyrimuose poveikis matuotas kilogramais; perskaičiavimas į procentus remiasi prielaida, kad tyrimų dalyvis svėrė apie ${WEIGHT_REFERENCE_KG} kg.`,
       ],
     },
     {

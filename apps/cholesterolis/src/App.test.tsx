@@ -75,10 +75,27 @@ describe('App', () => {
   it('updates the projection when the weight slider moves', async () => {
     render(<App />);
     await enterPanel({ tc: '6,2', hdl: '1,3', ldl: '4,1', tg: '1,8' });
-    fireEvent.change(screen.getByRole('slider', { name: 'Kiek kilogramų numesti' }), { target: { value: '10' } });
-    expect(projectionOf('tc').getByText('5,70')).toBeInTheDocument();
-    expect(projectionOf('ldl').getByText('3,90')).toBeInTheDocument();
-    expect(within(lever(/Svorio metimas/)).getByTestId('effect')).toHaveTextContent('BCH −0,50 mmol/l');
+    fireEvent.change(screen.getByRole('slider', { name: 'Kiek procentų svorio numesti' }), { target: { value: '20' } });
+    expect(projectionOf('tc').getByText('5,35')).toBeInTheDocument();
+    expect(projectionOf('ldl').getByText('3,76')).toBeInTheDocument();
+    expect(within(lever(/Svorio metimas/)).getByTestId('effect')).toHaveTextContent('BCH −0,85 mmol/l');
+  });
+
+  it('warns that the weight effect assumes overweight when BMI is unknown', () => {
+    render(<App />);
+    expect(within(lever(/Svorio metimas/)).getByText(/nustatytas antsvorio turintiems žmonėms/)).toBeInTheDocument();
+    expect(screen.getByRole('slider', { name: 'Kiek procentų svorio numesti' })).toHaveAttribute('aria-valuetext', '0 %');
+  });
+
+  it('shows kilograms and no warning for an overweight person', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await user.type(screen.getByRole('textbox', { name: /Svoris/ }), '90');
+    await user.type(screen.getByRole('textbox', { name: /Ūgis/ }), '175');
+    const slider = screen.getByRole('slider', { name: 'Kiek procentų svorio numesti' });
+    fireEvent.change(slider, { target: { value: '10' } });
+    expect(slider).toHaveAttribute('aria-valuetext', '10 % (9,0 kg)');
+    expect(within(lever(/Svorio metimas/)).queryByText(/greičiausiai/)).not.toBeInTheDocument();
   });
 
   it('limits the weight slider using BMI from body inputs', async () => {
@@ -86,8 +103,9 @@ describe('App', () => {
     render(<App />);
     await user.type(screen.getByRole('textbox', { name: /Svoris/ }), '65');
     await user.type(screen.getByRole('textbox', { name: /Ūgis/ }), '180');
-    expect(screen.getByRole('slider', { name: 'Kiek kilogramų numesti' })).toHaveAttribute('max', '5');
+    expect(screen.getByRole('slider', { name: 'Kiek procentų svorio numesti' })).toHaveAttribute('max', '7');
     expect(screen.getByText(/Kūno masės indeksas/)).toHaveTextContent('20,1');
+    expect(within(lever(/Svorio metimas/)).getByText(/normalus svoris\. Tyrimuose dalyvavo/)).toBeInTheDocument();
   });
 
   it('applies checkbox interventions to the projection', async () => {
@@ -196,14 +214,14 @@ describe('App', () => {
     const user = await enterPanel({ tc: '6,2', hdl: '1,3', ldl: '4,1', tg: '1,8' });
     await user.click(screen.getByRole('radio', { name: 'pavalgius' }));
     await user.selectOptions(screen.getByRole('combobox', { name: 'Rūkymas' }), 'no');
-    fireEvent.change(screen.getByRole('slider', { name: 'Kiek kilogramų numesti' }), { target: { value: '10' } });
+    fireEvent.change(screen.getByRole('slider', { name: 'Kiek procentų svorio numesti' }), { target: { value: '20' } });
     unmount();
 
     render(<App />);
     expect(screen.getByRole('textbox', { name: /Bendrasis cholesterolis/ })).toHaveValue('6,2');
     expect(screen.getByRole('radio', { name: 'pavalgius' })).toBeChecked();
     expect(screen.getByRole('combobox', { name: 'Rūkymas' })).toHaveValue('no');
-    expect(projectionOf('tc').getByText('5,70')).toBeInTheDocument();
+    expect(projectionOf('tc').getByText('5,35')).toBeInTheDocument();
 
     await userEvent.setup().click(screen.getByRole('button', { name: 'Ištrinti įvestus duomenis' }));
     expect(screen.getByRole('textbox', { name: /Bendrasis cholesterolis/ })).toHaveValue('');

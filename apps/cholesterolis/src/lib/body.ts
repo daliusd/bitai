@@ -1,7 +1,7 @@
 import type { Body } from './types';
 
 export const DEFAULT_ENERGY_KCAL = 2000;
-export const MAX_WEIGHT_LOSS_KG = 20;
+export const MAX_WEIGHT_LOSS_PCT = 20;
 const MIN_HEALTHY_BMI = 18.5;
 /** Physical activity level for a mostly sedentary adult. */
 const ACTIVITY_FACTOR = 1.4;
@@ -32,11 +32,11 @@ export function energyNeed(body: Body): number {
   return Math.round(((base + sexTerm) * ACTIVITY_FACTOR) / 50) * 50;
 }
 
-/** Largest weight loss offered by the slider: never below a BMI of 18.5. */
-export function maxWeightLoss(body: Body): number {
+/** Largest weight loss (% of body weight) offered by the slider: never below a BMI of 18.5. */
+export function maxWeightLossPct(body: Body): number {
   const { weight, height } = body;
-  if (!weight || !height) return MAX_WEIGHT_LOSS_KG;
+  if (!weight || !height) return MAX_WEIGHT_LOSS_PCT;
   const m = height / 100;
-  const room = Math.floor(weight - MIN_HEALTHY_BMI * m * m);
-  return Math.max(0, Math.min(MAX_WEIGHT_LOSS_KG, room));
+  const room = Math.floor(((weight - MIN_HEALTHY_BMI * m * m) / weight) * 100);
+  return Math.max(0, Math.min(MAX_WEIGHT_LOSS_PCT, room));
 }

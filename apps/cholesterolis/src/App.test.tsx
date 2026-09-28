@@ -14,7 +14,9 @@ async function enterPanel(values: Partial<Record<'tc' | 'hdl' | 'ldl' | 'tg', st
   for (const [m, v] of Object.entries(values)) {
     const input = screen.getByRole('textbox', { name: labels[m as keyof typeof labels] });
     await user.clear(input);
-    await user.type(input, v);
+    // Paste rather than type: each keystroke re-renders the whole app, which is slow on build machines.
+    await user.click(input);
+    await user.paste(v);
   }
   return user;
 }

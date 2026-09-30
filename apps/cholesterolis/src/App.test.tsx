@@ -86,6 +86,7 @@ describe('App', () => {
   it('warns that the weight effect assumes overweight when BMI is unknown', () => {
     render(<App />);
     expect(within(lever(/Svorio metimas/)).getByText(/nustatytas antsvorio turintiems žmonėms/)).toBeInTheDocument();
+    expect(within(lever(/Mažiau angliavandenių/)).getByText(/Normalaus svorio žmonėms MTL/)).toBeInTheDocument();
     expect(screen.getByRole('slider', { name: 'Kiek kilogramų numesti' })).toHaveAttribute('aria-valuetext', '0 kg');
   });
 
@@ -97,7 +98,8 @@ describe('App', () => {
     const slider = screen.getByRole('slider', { name: 'Kiek kilogramų numesti' });
     fireEvent.change(slider, { target: { value: '9' } });
     expect(slider).toHaveAttribute('aria-valuetext', '9 kg (10 % svorio)');
-    expect(within(lever(/Svorio metimas/)).queryByText(/greičiausiai/)).not.toBeInTheDocument();
+    expect(lever(/Svorio metimas/).querySelector('.warning')).toBeNull();
+    expect(lever(/Mažiau angliavandenių/).querySelector('.warning')).toBeNull();
   });
 
   it('limits the weight slider using BMI from body inputs', async () => {
@@ -107,7 +109,8 @@ describe('App', () => {
     await user.type(screen.getByRole('textbox', { name: /Ūgis/ }), '180');
     expect(screen.getByRole('slider', { name: 'Kiek kilogramų numesti' })).toHaveAttribute('max', '5');
     expect(screen.getByText(/Kūno masės indeksas/)).toHaveTextContent('20,1');
-    expect(within(lever(/Svorio metimas/)).getByText(/normalus svoris\. Tyrimuose dalyvavo/)).toBeInTheDocument();
+    expect(within(lever(/Svorio metimas/)).getByText(/pagal CALERIE tyrimą/)).toBeInTheDocument();
+    expect(within(lever(/Mažiau angliavandenių/)).getByText(/Prognozėje naudojame šį padidėjimą/)).toBeInTheDocument();
   });
 
   it('applies checkbox interventions to the projection', async () => {

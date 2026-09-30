@@ -22,6 +22,18 @@ export const SOURCES = {
     label: 'Hasan B. ir kt. Svorio mažinimas ir kraujo lipidai antsvorio ir nutukimo atveju: 73 atsitiktinių imčių tyrimų metaanalizė. J Clin Endocrinol Metab, 2020',
     url: pubmed('32954416'),
   },
+  kraus2019: {
+    label: 'Kraus W.E. ir kt. Dvejų metų kalorijų ribojimas ir širdies bei kraujagyslių rizika (CALERIE): atsitiktinių imčių tyrimas su žmonėmis be nutukimo. Lancet Diabetes Endocrinol, 2019',
+    url: pubmed('31303390'),
+  },
+  huffman2022: {
+    label: 'Huffman K.M. ir kt. Kalorijų ribojimas gerina lipidų rodiklius žmonėms be nutukimo (CALERIE). eClinicalMedicine, 2022',
+    url: 'https://www.thelancet.com/journals/eclinm/article/PIIS2589-5370(21)00542-3/fulltext',
+  },
+  sotoMota2024: {
+    label: 'Soto-Mota A. ir kt. MTL padidėjimas mažai angliavandenių turinčioje mityboje normalaus, bet ne didesnio svorio žmonėms: metaanalizė. Am J Clin Nutr, 2024',
+    url: 'https://ajcn.nutrition.org/article/S0002-9165(24)00009-1/fulltext',
+  },
   zomer2016: {
     label: 'Zomer E. ir kt. Svorio mažinimo intervencijos ir širdies bei kraujagyslių rizikos veiksniai: metaanalizė. Obes Rev, 2016',
     url: pubmed('27324830'),

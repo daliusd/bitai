@@ -39,6 +39,17 @@ describe('single interventions', () => {
     expect(e.tc).toBeUndefined();
   });
 
+  it('weight loss below BMI 25 follows CALERIE per-kg values', () => {
+    const e = weightEffect(7.5, 22);
+    expect(e.ldl).toBeCloseTo(-0.18);
+    expect(e.hdl).toBeCloseTo(0.1);
+    expect(e.tg).toBeCloseTo(-0.25);
+    // Unknown BMI or BMI ≥ 25 keeps Hasan 2020
+    expect(weightEffect(10, 27)).toEqual(weightEffect(10));
+    const lean = computeEffects({ ...DEFAULT_CHOICES, weightKg: 7.5 }, { weight: 65, height: 180, sex: '' }, unknown);
+    expect(lean.weight.ldl).toBeCloseTo(-0.18);
+  });
+
   it('saturated fat converts grams to energy percent', () => {
     expect(gramsToEnergyPct(10, 2000)).toBeCloseTo(4.5);
     const e = satFatEffect(10, 'pufa', 2000);
@@ -90,6 +101,14 @@ describe('triglyceride levers', () => {
   it('low-carb diet lowers TG but raises LDL and HDL', () => {
     expect(lowCarbEffect(true)).toEqual({ ldl: 0.16, hdl: 0.14, tg: -0.26 });
     expect(lowCarbEffect(false).tg).toBe(0);
+  });
+
+  it('low-carb raises LDL by ~1 mmol/L below BMI 25 (Soto-Mota 2024)', () => {
+    expect(lowCarbEffect(true, 22).ldl).toBeCloseTo(41 / 38.67);
+    expect(lowCarbEffect(true, 22).tg).toBeCloseTo(-0.26);
+    expect(lowCarbEffect(true, 30).ldl).toBeCloseTo(0.16);
+    const lean = computeEffects({ ...DEFAULT_CHOICES, lowCarb: true }, { weight: 65, height: 180, sex: '' }, unknown);
+    expect(lean.lowCarb.ldl).toBeCloseTo(1.06, 2);
   });
 
   it('projects relative TG changes and skips omega-3 for current users', () => {

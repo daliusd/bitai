@@ -1,5 +1,5 @@
 import type { Body, Lifestyle, Lipids } from './types';
-import { energyNeed } from './body';
+import { bmi, energyNeed } from './body';
 
 /**
  * Change in lipids (mmol/L). `ldlPct` / `tgPct` are relative changes, e.g. -0.08 for −8 %.
@@ -76,11 +76,27 @@ const DIET_IDS: InterventionId[] = ['satFat', 'sugar', 'fiber', 'sterols', 'nuts
 
 // --- Weight loss: Hasan 2020, 73 RCTs, lifestyle interventions, per kg lost at 6–12 months:
 // TG −4.0 mg/dL, LDL −1.28 mg/dL, HDL +0.46 mg/dL. TC is not reported, so it follows from the parts.
-// Participants averaged 101.6 kg (BMI 36.3); applied to leaner people the effect is likely smaller.
+// Participants averaged 101.6 kg (BMI 36.3).
 export const PER_KG = { ldl: -1.28 / 38.67, hdl: 0.46 / 38.67, tg: -4.0 / 88.57 };
 
-export function weightEffect(kg: number): Effect {
-  return { ldl: PER_KG.ldl * kg, hdl: PER_KG.hdl * kg, tg: PER_KG.tg * kg };
+// Below BMI 25: CALERIE (Kraus 2019, Huffman 2022), adults without obesity (BMI 22–28, mean 25.1)
+// lost 7.5 kg over 2 years; LDL 2.51 → 2.33, HDL 1.26 → 1.36, TG 1.15 → 0.90 mmol/L.
+export const CALERIE_LOSS_KG = 7.5;
+export const LEAN_PER_KG = {
+  ldl: (2.33 - 2.51) / CALERIE_LOSS_KG,
+  hdl: (1.36 - 1.26) / CALERIE_LOSS_KG,
+  tg: (0.9 - 1.15) / CALERIE_LOSS_KG,
+};
+
+export const OVERWEIGHT_BMI = 25;
+
+export function isLean(bmiValue: number | undefined): boolean {
+  return bmiValue !== undefined && bmiValue < OVERWEIGHT_BMI;
+}
+
+export function weightEffect(kg: number, bmiValue?: number): Effect {
+  const p = isLean(bmiValue) ? LEAN_PER_KG : PER_KG;
+  return { ldl: p.ldl * kg, hdl: p.hdl * kg, tg: p.tg * kg };
 }
 
 // --- Saturated fat: Mensink 2016 (WHO), per 1 % of energy of SFA replaced.
@@ -178,8 +194,13 @@ export function omega3Effect(grams: Omega3Dose): Effect {
 // --- Low-carbohydrate diet (< 20 % energy) vs low-fat diet, ≥ 6 months: Mansoor 2016.
 export const LOW_CARB = { ldl: 0.16, hdl: 0.14, tg: -0.26 };
 
-export function lowCarbEffect(on: boolean): Effect {
-  return on ? { ...LOW_CARB } : NO_EFFECT;
+// Below BMI 25: Soto-Mota 2024, trials with mean BMI < 25 saw LDL rise by 41 mg/dL (95 % CI 19.6–63.3)
+// on a low-carbohydrate diet; at BMI 25–35 it did not change.
+export const LOW_CARB_LEAN_LDL = 41 / 38.67;
+
+export function lowCarbEffect(on: boolean, bmiValue?: number): Effect {
+  if (!on) return NO_EFFECT;
+  return isLean(bmiValue) ? { ...LOW_CARB, ldl: LOW_CARB_LEAN_LDL } : { ...LOW_CARB };
 }
 
 export type Applicability = 'available' | 'partial' | 'already';
@@ -213,8 +234,9 @@ export function computeEffects(
   body: Body,
   lifestyle: Lifestyle,
 ): Record<InterventionId, Effect> {
+  const bmiValue = bmi(body);
   const effects: Record<InterventionId, Effect> = {
-    weight: weightEffect(choices.weightKg),
+    weight: weightEffect(choices.weightKg, bmiValue),
     satFat: satFatEffect(choices.satFatG, choices.satFatReplacement, energyNeed(body)),
     sugar: sugarEffect(choices.sugarG),
     fiber: fiberEffect(choices.fiberG),
@@ -224,7 +246,7 @@ export function computeEffects(
     smoking: smokingEffect(choices.quitSmoking, lifestyle),
     alcohol: alcoholEffect(choices.reduceAlcohol, lifestyle),
     omega3: omega3Effect(choices.omega3G),
-    lowCarb: lowCarbEffect(choices.lowCarb),
+    lowCarb: lowCarbEffect(choices.lowCarb, bmiValue),
   };
   for (const id of Object.keys(effects) as InterventionId[]) {
     if (applicability(id, lifestyle) === 'already') effects[id] = NO_EFFECT;

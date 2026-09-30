@@ -3,7 +3,7 @@ import type { Body, Lifestyle, Lipids, Marker, Unit } from '../lib/types';
 import type { Status } from '../lib/reference';
 import Priorities from './Priorities';
 import type { ActivityTarget, Choices, Effect, FatReplacement, InterventionId, Omega3Dose } from '../lib/interventions';
-import { MAX_FIBER_G, PER_KG, applicability } from '../lib/interventions';
+import { LEAN_PER_KG, LOW_CARB_LEAN_LDL, MAX_FIBER_G, PER_KG, applicability, isLean } from '../lib/interventions';
 import { bmi, energyNeed } from '../lib/body';
 import { formatNumber } from '../lib/units';
 import { SOURCES } from '../lib/sources';
@@ -81,24 +81,26 @@ export default function Interventions({ choices, onChange, effects, body, lifest
           ) : bmiValue === undefined ? (
             <p className="warning">
               Šis poveikis nustatytas antsvorio turintiems žmonėms. Jei jūsų svoris normalus, svorio metimas
-              lipidus greičiausiai pakeis mažiau, nei rodoma. Įveskite svorį ir ūgį – pamatysite savo kūno masės
-              indeksą.
+              lipidus pakeis mažiau, nei rodoma. Įveskite svorį ir ūgį – tada poveikį apskaičiuosime pagal jūsų kūno
+              masės indeksą.
             </p>
-          ) : bmiValue < 25 ? (
+          ) : isLean(bmiValue) ? (
             <p className="warning">
-              Jūsų kūno masės indeksas {formatNumber(bmiValue, 1)} – normalus svoris. Tyrimuose dalyvavo daugiausia
-              antsvorio turintys žmonės; esant normaliam svoriui, svorio metimo poveikis lipidams greičiausiai
-              mažesnis, nei rodoma.
+              Jūsų kūno masės indeksas {formatNumber(bmiValue, 1)} – normalus svoris, todėl poveikį skaičiuojame pagal
+              CALERIE tyrimą su žmonėmis be nutukimo (KMI 22–28): kilogramas sumažina MTL{' '}
+              {formatNumber(-LEAN_PER_KG.ldl, 3)} mmol/l, trigliceridus – {formatNumber(-LEAN_PER_KG.tg, 3)} mmol/l ir
+              padidina DTL {formatNumber(LEAN_PER_KG.hdl, 3)} mmol/l. Visiškai normalaus svorio dalyviams poveikis
+              buvo dar mažesnis nei antsvorio turintiems.
             </p>
           ) : null}
         </>
       ),
-      sources: [SOURCES.hasan2020, SOURCES.dattilo1992, SOURCES.zomer2016],
+      sources: [SOURCES.hasan2020, SOURCES.kraus2019, SOURCES.huffman2022, SOURCES.dattilo1992, SOURCES.zomer2016],
       limitations: [
         'Kol svoris krenta, DTL gali laikinai sumažėti; padidėja, kai svoris stabilizuojasi (Dattilo 1992).',
         'Priaugus svorio atgal, rodikliai grįžta.',
         'Esant normaliam svoriui, svorio metimas nerekomenduojamas; slankiklis neleidžia nukristi žemiau KMI 18,5.',
-        'Dalyvių vidutinis kūno masės indeksas buvo 36,3 (nutukimas); esant mažesniam antsvoriui poveikis gali būti mažesnis.',
+        'CALERIE rezultatai – pokytis kalorijas ribojusių dalyvių grupėje, nepalyginus su kontroline grupe; jų MTL ir trigliceridai iš pradžių buvo žemi.',
       ],
     },
     {
@@ -430,17 +432,34 @@ export default function Interventions({ choices, onChange, effects, body, lifest
         </label>
       ),
       body: (
-        <p>
-          Palyginus su mažai riebalų turinčia mityba, mažai angliavandenių turinti mityba per pusmetį ir ilgiau labiau
-          sumažino trigliceridus (0,26 mmol/l) ir padidino DTL (0,14 mmol/l), bet taip pat padidino MTL (0,16 mmol/l).
-          Tai vienas efektyviausių būdų mažinti trigliceridus, bet ne MTL.
-        </p>
+        <>
+          <p>
+            Palyginus su mažai riebalų turinčia mityba, mažai angliavandenių turinti mityba per pusmetį ir ilgiau
+            labiau sumažino trigliceridus (0,26 mmol/l) ir padidino DTL (0,14 mmol/l), bet taip pat padidino MTL
+            (0,16 mmol/l). Tai vienas efektyviausių būdų mažinti trigliceridus, bet ne MTL.
+          </p>
+          {bmiValue === undefined ? (
+            <p className="warning">
+              Normalaus svorio žmonėms MTL šioje mityboje padidėja daug labiau – vidutiniškai apie{' '}
+              {formatNumber(LOW_CARB_LEAN_LDL, 1)} mmol/l. Įveskite svorį ir ūgį – tada poveikį apskaičiuosime pagal
+              jūsų kūno masės indeksą.
+            </p>
+          ) : isLean(bmiValue) ? (
+            <p className="warning">
+              Jūsų kūno masės indeksas {formatNumber(bmiValue, 1)} – normalus svoris. Tyrimuose su normalaus svorio
+              žmonėmis MTL mažai angliavandenių turinčioje mityboje padidėjo vidutiniškai{' '}
+              {formatNumber(LOW_CARB_LEAN_LDL, 2)} mmol/l (nuo 0,5 iki 1,6 mmol/l), o esant antsvoriui – nepakito.
+              Prognozėje naudojame šį padidėjimą.
+            </p>
+          ) : null}
+        </>
       ),
-      sources: [SOURCES.mansoor2016],
+      sources: [SOURCES.mansoor2016, SOURCES.sotoMota2024],
       limitations: [
         'MTL padidėja – jei pagrindinė problema yra MTL, šis kelias gali pakenkti. Jei angliavandenius pakeičiate sviestu ir riebia mėsa, MTL gali padidėti dar labiau.',
         'Tyrimuose lyginta su mažai riebalų turinčia, o ne su įprasta mityba, todėl poveikis įprastai mitybai gali skirtis.',
         'Dalis poveikio atsiranda dėl svorio mažėjimo, o sumažinus cukrų – iš dalies sutampa su cukraus skiltimi.',
+        'Normalaus svorio žmonių tyrimų buvo nedaug, daugiausia su labai mažai angliavandenių (ketogenine) mityba.',
         'Vartojant vaistus diabetui gydyti, staigus angliavandenių sumažinimas gali sukelti hipoglikemiją – pasitarkite su gydytoju.',
       ],
     },

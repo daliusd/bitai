@@ -280,9 +280,30 @@ export function computeEffects(
  */
 export const DIET_LDL_CAP_PCT = 0.3;
 
+/**
+ * Pairs whose study effects overlap, so their sum overstates the change. Hasan 2020's
+ * per-kg weight effect comes from lifestyle programmes that also changed diet and activity;
+ * Mansoor 2016's low-carb arms cut sugar and usually ate more saturated fat.
+ */
+const OVERLAPS: [InterventionId, InterventionId[]][] = [
+  ['weight', ['satFat', 'sugar', 'fiber', 'nuts', 'activity', 'lowCarb']],
+  ['lowCarb', ['satFat', 'sugar']],
+];
+
+const isActive = (e: Effect) =>
+  [e.ldl, e.hdl, e.tg, e.ldlPct ?? 0, e.tgPct ?? 0, e.tc ?? 0].some((v) => Math.abs(v) > 1e-9);
+
+/** Whether the chosen changes include a pair whose effects were measured together. */
+export function hasOverlap(effects: Record<InterventionId, Effect>): boolean {
+  return OVERLAPS.some(
+    ([id, others]) => isActive(effects[id]) && others.some((o) => isActive(effects[o])),
+  );
+}
+
 export interface Projection {
   lipids: Lipids;
   capped: boolean;
+  overlap: boolean;
 }
 
 export function project(base: Lipids, effects: Record<InterventionId, Effect>): Projection {
@@ -309,5 +330,9 @@ export function project(base: Lipids, effects: Record<InterventionId, Effect>): 
   const newTg = Math.max(0.3, base.tg + tg);
   const newTc =
     base.tc + (newLdl - base.ldl) + (newHdl - base.hdl) + (newTg - base.tg) / 2.2 + tcExtra;
-  return { lipids: { tc: newTc, ldl: newLdl, hdl: newHdl, tg: newTg }, capped };
+  return {
+    lipids: { tc: newTc, ldl: newLdl, hdl: newHdl, tg: newTg },
+    capped,
+    overlap: hasOverlap(effects),
+  };
 }

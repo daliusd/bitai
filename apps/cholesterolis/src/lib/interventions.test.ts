@@ -192,4 +192,30 @@ describe('project', () => {
     expect(p.capped).toBe(true);
     expect(p.lipids.ldl).toBeCloseTo(2.1);
   });
+
+  it('does not flag overlap for a single change or independent ones', () => {
+    const one = project(base, computeEffects({ ...DEFAULT_CHOICES, weightKg: 5 }, { sex: '' }, unknown));
+    expect(one.overlap).toBe(false);
+    const independent = project(
+      base,
+      computeEffects({ ...DEFAULT_CHOICES, weightKg: 5, sterols: true }, { sex: '' }, unknown),
+    );
+    expect(independent.overlap).toBe(false);
+  });
+
+  it('flags overlap when weight loss is combined with diet or activity changes', () => {
+    const p = project(
+      base,
+      computeEffects({ ...DEFAULT_CHOICES, weightKg: 5, activity: '150' }, { sex: '' }, unknown),
+    );
+    expect(p.overlap).toBe(true);
+  });
+
+  it('flags overlap when a low-carb diet is combined with a saturated-fat change', () => {
+    const p = project(
+      base,
+      computeEffects({ ...DEFAULT_CHOICES, lowCarb: true, satFatG: 10 }, { sex: '' }, unknown),
+    );
+    expect(p.overlap).toBe(true);
+  });
 });

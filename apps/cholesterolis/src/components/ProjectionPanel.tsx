@@ -90,6 +90,12 @@ export default function ProjectionPanel({ base, projection, unit, fasting, sex }
           {projection.capped && (
             <p className="note">Mitybos pokyčių poveikis MTL apribotas iki 30 % – daugiau vien mityba retai pasiekiama.</p>
           )}
+          {projection.overlap && (
+            <p className="note">
+              Kai kurių pasirinktų pokyčių poveikis persidengia – pvz., svorio metimo tyrimuose žmonės kartu keitė
+              mitybą ir judėjo daugiau. Sudėjus jų poveikį, prognozė gali būti per optimistinė.
+            </p>
+          )}
           <p className="projection-foot">Vienetai: {u}. Tai apytikslis vidurkis, ne jūsų asmeninė prognozė.</p>
         </>
       )}

@@ -30,12 +30,12 @@ const unknown: Lifestyle = {
 const base: Lipids = { tc: 6.2, ldl: 4.1, hdl: 1.3, tg: 1.8 };
 
 describe('single interventions', () => {
-  it('weight loss restates Hasan 2020 per-kg values per % of a 101.6 kg body', () => {
-    // 10 % of 101.6 kg = 10.16 kg: LDL −1.28, HDL +0.46, TG −4.0 mg/dL per kg
+  it('weight loss follows Hasan 2020 per-kg values', () => {
+    // LDL −1.28, HDL +0.46, TG −4.0 mg/dL per kg
     const e = weightEffect(10);
-    expect(e.ldl).toBeCloseTo((-1.28 * 10.16) / 38.67);
-    expect(e.hdl).toBeCloseTo((0.46 * 10.16) / 38.67);
-    expect(e.tg).toBeCloseTo((-4.0 * 10.16) / 88.57);
+    expect(e.ldl).toBeCloseTo((-1.28 * 10) / 38.67);
+    expect(e.hdl).toBeCloseTo((0.46 * 10) / 38.67);
+    expect(e.tg).toBeCloseTo((-4.0 * 10) / 88.57);
     expect(e.tc).toBeUndefined();
   });
 
@@ -132,11 +132,11 @@ describe('project', () => {
   });
 
   it('applies weight loss, deriving TC from its parts', () => {
-    const p = project(base, computeEffects({ ...DEFAULT_CHOICES, weightPct: 20 }, { sex: '' }, unknown));
-    expect(p.lipids.tc).toBeCloseTo(5.352);
-    expect(p.lipids.ldl).toBeCloseTo(3.427);
-    expect(p.lipids.hdl).toBeCloseTo(1.542);
-    expect(p.lipids.tg).toBeCloseTo(0.882);
+    const p = project(base, computeEffects({ ...DEFAULT_CHOICES, weightKg: 20 }, { sex: '' }, unknown));
+    expect(p.lipids.tc).toBeCloseTo(5.366);
+    expect(p.lipids.ldl).toBeCloseTo(3.438);
+    expect(p.lipids.hdl).toBeCloseTo(1.538);
+    expect(p.lipids.tg).toBeCloseTo(0.897);
   });
 
   it('applies relative LDL changes (sterols) to baseline LDL', () => {

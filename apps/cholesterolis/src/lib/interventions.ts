@@ -29,7 +29,7 @@ export type ActivityTarget = 'none' | '150' | '300';
 export type Omega3Dose = 0 | 1 | 2 | 4;
 
 export interface Choices {
-  weightPct: number;
+  weightKg: number;
   satFatG: number;
   satFatReplacement: FatReplacement;
   sugarG: number;
@@ -44,7 +44,7 @@ export interface Choices {
 }
 
 export const DEFAULT_CHOICES: Choices = {
-  weightPct: 0,
+  weightKg: 0,
   satFatG: 0,
   satFatReplacement: 'pufa',
   sugarG: 0,
@@ -76,24 +76,11 @@ const DIET_IDS: InterventionId[] = ['satFat', 'sugar', 'fiber', 'sterols', 'nuts
 
 // --- Weight loss: Hasan 2020, 73 RCTs, lifestyle interventions, per kg lost at 6–12 months:
 // TG −4.0 mg/dL, LDL −1.28 mg/dL, HDL +0.46 mg/dL. TC is not reported, so it follows from the parts.
+// Participants averaged 101.6 kg (BMI 36.3); applied to leaner people the effect is likely smaller.
 export const PER_KG = { ldl: -1.28 / 38.67, hdl: 0.46 / 38.67, tg: -4.0 / 88.57 };
 
-/**
- * A kilogram means more to a light person than to a heavy one, so the per-kg values are
- * restated per 1 % of body weight of the trials' participants (mean 101.6 kg, BMI 36.3).
- */
-export const WEIGHT_REFERENCE_KG = 101.6;
-
-export const PER_WEIGHT_PCT = {
-  ldl: (PER_KG.ldl * WEIGHT_REFERENCE_KG) / 100,
-  hdl: (PER_KG.hdl * WEIGHT_REFERENCE_KG) / 100,
-  tg: (PER_KG.tg * WEIGHT_REFERENCE_KG) / 100,
-};
-
-/** Effect of losing `pct` % of body weight. */
-export function weightEffect(pct: number): Effect {
-  const p = PER_WEIGHT_PCT;
-  return { ldl: p.ldl * pct, hdl: p.hdl * pct, tg: p.tg * pct };
+export function weightEffect(kg: number): Effect {
+  return { ldl: PER_KG.ldl * kg, hdl: PER_KG.hdl * kg, tg: PER_KG.tg * kg };
 }
 
 // --- Saturated fat: Mensink 2016 (WHO), per 1 % of energy of SFA replaced.
@@ -227,7 +214,7 @@ export function computeEffects(
   lifestyle: Lifestyle,
 ): Record<InterventionId, Effect> {
   const effects: Record<InterventionId, Effect> = {
-    weight: weightEffect(choices.weightPct),
+    weight: weightEffect(choices.weightKg),
     satFat: satFatEffect(choices.satFatG, choices.satFatReplacement, energyNeed(body)),
     sugar: sugarEffect(choices.sugarG),
     fiber: fiberEffect(choices.fiberG),

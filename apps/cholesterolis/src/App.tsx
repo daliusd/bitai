@@ -4,7 +4,7 @@ import type { Body, Lifestyle, Marker, Sex, Unit } from './lib/types';
 import { MARKERS } from './lib/types';
 import { formatNumber, fromMmol, parseNumber, toMmol } from './lib/units';
 import { checkConsistency } from './lib/consistency';
-import { maxWeightLossPct } from './lib/body';
+import { maxWeightLoss } from './lib/body';
 import { DEFAULT_CHOICES, computeEffects, project } from './lib/interventions';
 import type { Choices } from './lib/interventions';
 import LipidInputs from './components/LipidInputs';
@@ -68,8 +68,8 @@ function Calculator({ onClear }: { onClear: () => void }) {
     sex: bodyRaw.sex as Sex,
   };
 
-  const maxLoss = maxWeightLossPct(body);
-  const effectiveChoices = { ...choices, weightPct: Math.min(choices.weightPct, maxLoss) };
+  const maxLoss = maxWeightLoss(body);
+  const effectiveChoices = { ...choices, weightKg: Math.min(choices.weightKg, maxLoss) };
   const consistency = checkConsistency(panel, fasting);
   const effects = computeEffects(effectiveChoices, body, lifestyle);
   const projection = consistency.lipids ? project(consistency.lipids, effects) : undefined;
@@ -157,7 +157,7 @@ function Calculator({ onClear }: { onClear: () => void }) {
             effects={effects}
             body={body}
             lifestyle={lifestyle}
-            maxWeightLossPct={maxLoss}
+            maxWeightLoss={maxLoss}
             unit={unit}
             base={consistency.lipids}
             statuses={statuses}

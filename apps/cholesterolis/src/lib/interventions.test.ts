@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   DEFAULT_CHOICES,
+  LEAN_PER_KG,
+  PER_KG,
   activityEffect,
   alcoholEffect,
   applicability,
@@ -14,6 +16,7 @@ import {
   satFatEffect,
   smokingEffect,
   sugarEffect,
+  splitWeightLoss,
   weightEffect,
 } from './interventions';
 import type { Lifestyle, Lipids } from './types';
@@ -40,14 +43,26 @@ describe('single interventions', () => {
   });
 
   it('weight loss below BMI 25 follows CALERIE per-kg values', () => {
-    const e = weightEffect(7.5, 22);
+    // 65 kg, 180 cm: BMI 20.1
+    const e = weightEffect(7.5, { weight: 65, height: 180, sex: '' });
     expect(e.ldl).toBeCloseTo(-0.18);
     expect(e.hdl).toBeCloseTo(0.1);
     expect(e.tg).toBeCloseTo(-0.25);
-    // Unknown BMI or BMI ≥ 25 keeps Hasan 2020
-    expect(weightEffect(10, 27)).toEqual(weightEffect(10));
+    // Unknown BMI, or a loss that keeps BMI ≥ 25, uses Hasan 2020 throughout
+    expect(weightEffect(10, { weight: 120, height: 180, sex: '' })).toEqual(weightEffect(10));
     const lean = computeEffects({ ...DEFAULT_CHOICES, weightKg: 7.5 }, { weight: 65, height: 180, sex: '' }, unknown);
     expect(lean.weight.ldl).toBeCloseTo(-0.18);
+  });
+
+  it('switches to CALERIE rates for the kilograms lost below BMI 25', () => {
+    // 180 cm: BMI 25 at 81 kg, so from 85 kg the first 4 kg use Hasan and the next 6 kg CALERIE
+    const body = { weight: 85, height: 180, sex: '' as const };
+    expect(splitWeightLoss(10, body)).toEqual({ overweightKg: expect.closeTo(4), leanKg: expect.closeTo(6) });
+    expect(splitWeightLoss(10, { sex: '' })).toEqual({ overweightKg: 10, leanKg: 0 });
+    const e = weightEffect(10, body);
+    expect(e.ldl).toBeCloseTo(4 * PER_KG.ldl + 6 * LEAN_PER_KG.ldl);
+    expect(e.tg).toBeCloseTo(4 * PER_KG.tg + 6 * LEAN_PER_KG.tg);
+    expect(Math.abs(e.ldl)).toBeLessThan(Math.abs(weightEffect(10).ldl));
   });
 
   it('saturated fat converts grams to energy percent', () => {

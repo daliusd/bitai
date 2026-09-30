@@ -3,7 +3,7 @@ import type { Body, Lifestyle, Lipids, Marker, Unit } from '../lib/types';
 import type { Status } from '../lib/reference';
 import Priorities from './Priorities';
 import type { ActivityTarget, Choices, Effect, FatReplacement, InterventionId, Omega3Dose } from '../lib/interventions';
-import { LEAN_PER_KG, LOW_CARB_LEAN_LDL, MAX_FIBER_G, PER_KG, applicability, isLean } from '../lib/interventions';
+import { LEAN_PER_KG, LOW_CARB_LEAN_LDL, MAX_FIBER_G, PER_KG, applicability, isLean, splitWeightLoss } from '../lib/interventions';
 import { bmi, energyNeed } from '../lib/body';
 import { formatNumber } from '../lib/units';
 import { SOURCES } from '../lib/sources';
@@ -48,6 +48,14 @@ export default function Interventions({ choices, onChange, effects, body, lifest
   const sugarIdeal = Math.round((kcal * 0.05) / 4);
   const activityPartial = applicability('activity', lifestyle) === 'partial';
   const bmiValue = bmi(body);
+  const weightSplit = splitWeightLoss(choices.weightKg, body);
+  const kg1 = (v: number) => formatNumber(v, 1);
+  const leanRates = (
+    <>
+      kilogramas sumažina MTL {formatNumber(-LEAN_PER_KG.ldl, 3)} mmol/l, trigliceridus –{' '}
+      {formatNumber(-LEAN_PER_KG.tg, 3)} mmol/l ir padidina DTL {formatNumber(LEAN_PER_KG.hdl, 3)} mmol/l
+    </>
+  );
   const weightKgLabel = (v: number) =>
     body.weight ? `${v} kg (${formatNumber((v / body.weight) * 100, 0)} % svorio)` : `${v} kg`;
 
@@ -87,10 +95,14 @@ export default function Interventions({ choices, onChange, effects, body, lifest
           ) : isLean(bmiValue) ? (
             <p className="warning">
               Jūsų kūno masės indeksas {formatNumber(bmiValue, 1)} – normalus svoris, todėl poveikį skaičiuojame pagal
-              CALERIE tyrimą su žmonėmis be nutukimo (KMI 22–28): kilogramas sumažina MTL{' '}
-              {formatNumber(-LEAN_PER_KG.ldl, 3)} mmol/l, trigliceridus – {formatNumber(-LEAN_PER_KG.tg, 3)} mmol/l ir
-              padidina DTL {formatNumber(LEAN_PER_KG.hdl, 3)} mmol/l. Visiškai normalaus svorio dalyviams poveikis
-              buvo dar mažesnis nei antsvorio turintiems.
+              CALERIE tyrimą su žmonėmis be nutukimo (KMI 22–28): {leanRates}. Visiškai normalaus svorio dalyviams
+              poveikis buvo dar mažesnis nei antsvorio turintiems.
+            </p>
+          ) : weightSplit.leanKg > 0 ? (
+            <p className="note">
+              Numetus {kg1(weightSplit.overweightKg)} kg, jūsų kūno masės indeksas nukris iki 25. Tolesnių{' '}
+              {kg1(weightSplit.leanKg)} kg nauda mažesnė, todėl juos skaičiuojame pagal CALERIE tyrimą su žmonėmis be
+              nutukimo: {leanRates}.
             </p>
           ) : null}
         </>

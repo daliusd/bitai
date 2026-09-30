@@ -102,6 +102,18 @@ describe('App', () => {
     expect(lever(/Mažiau angliavandenių/).querySelector('.warning')).toBeNull();
   });
 
+  it('uses smaller effects for the kilograms lost below BMI 25', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await user.type(screen.getByRole('textbox', { name: /Svoris/ }), '85');
+    await user.type(screen.getByRole('textbox', { name: /Ūgis/ }), '180');
+    const weight = lever(/Svorio metimas/);
+    fireEvent.change(screen.getByRole('slider', { name: 'Kiek kilogramų numesti' }), { target: { value: '4' } });
+    expect(within(weight).queryByText(/Tolesnių/)).not.toBeInTheDocument();
+    fireEvent.change(screen.getByRole('slider', { name: 'Kiek kilogramų numesti' }), { target: { value: '10' } });
+    expect(within(weight).getByText(/Tolesnių/)).toHaveTextContent('Numetus 4,0 kg, jūsų kūno masės indeksas nukris iki 25. Tolesnių 6,0 kg');
+  });
+
   it('limits the weight slider using BMI from body inputs', async () => {
     const user = userEvent.setup();
     render(<App />);

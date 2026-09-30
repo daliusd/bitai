@@ -32,6 +32,14 @@ export function energyNeed(body: Body): number {
   return Math.round(((base + sexTerm) * ACTIVITY_FACTOR) / 50) * 50;
 }
 
+/** Kilograms to lose before BMI reaches `target`; undefined when weight or height is missing. */
+export function kgAboveBmi(body: Body, target: number): number | undefined {
+  const { weight, height } = body;
+  if (!weight || !height) return undefined;
+  const m = height / 100;
+  return Math.max(0, weight - target * m * m);
+}
+
 /** Largest weight loss (kg) offered by the slider: never below a BMI of 18.5. */
 export function maxWeightLoss(body: Body): number {
   const { weight, height } = body;

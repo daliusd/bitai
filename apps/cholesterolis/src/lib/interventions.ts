@@ -1,5 +1,5 @@
 import type { Body, Lifestyle, Lipids } from './types';
-import { bmi, energyNeed } from './body';
+import { bmi, energyNeed, kgAboveBmi } from './body';
 
 /**
  * Change in lipids (mmol/L). `ldlPct` / `tgPct` are relative changes, e.g. -0.08 for −8 %.
@@ -94,9 +94,28 @@ export function isLean(bmiValue: number | undefined): boolean {
   return bmiValue !== undefined && bmiValue < OVERWEIGHT_BMI;
 }
 
-export function weightEffect(kg: number, bmiValue?: number): Effect {
-  const p = isLean(bmiValue) ? LEAN_PER_KG : PER_KG;
-  return { ldl: p.ldl * kg, hdl: p.hdl * kg, tg: p.tg * kg };
+export interface WeightLossSplit {
+  /** Kilograms lost while BMI is still 25 or more (Hasan 2020 rates). */
+  overweightKg: number;
+  /** Kilograms lost after BMI has dropped below 25 (CALERIE rates). */
+  leanKg: number;
+}
+
+/** Splits a loss at the point where BMI reaches 25; without weight and height all of it counts as overweight. */
+export function splitWeightLoss(kg: number, body: Body): WeightLossSplit {
+  const room = kgAboveBmi(body, OVERWEIGHT_BMI);
+  if (room === undefined) return { overweightKg: kg, leanKg: 0 };
+  const overweightKg = Math.min(kg, room);
+  return { overweightKg, leanKg: kg - overweightKg };
+}
+
+export function weightEffect(kg: number, body: Body = { sex: '' }): Effect {
+  const { overweightKg: o, leanKg: l } = splitWeightLoss(kg, body);
+  return {
+    ldl: PER_KG.ldl * o + LEAN_PER_KG.ldl * l,
+    hdl: PER_KG.hdl * o + LEAN_PER_KG.hdl * l,
+    tg: PER_KG.tg * o + LEAN_PER_KG.tg * l,
+  };
 }
 
 // --- Saturated fat: Mensink 2016 (WHO), per 1 % of energy of SFA replaced.
@@ -236,7 +255,7 @@ export function computeEffects(
 ): Record<InterventionId, Effect> {
   const bmiValue = bmi(body);
   const effects: Record<InterventionId, Effect> = {
-    weight: weightEffect(choices.weightKg, bmiValue),
+    weight: weightEffect(choices.weightKg, body),
     satFat: satFatEffect(choices.satFatG, choices.satFatReplacement, energyNeed(body)),
     sugar: sugarEffect(choices.sugarG),
     fiber: fiberEffect(choices.fiberG),

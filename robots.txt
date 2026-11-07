@@ -1,2 +1,4 @@
 User-agent: *
-Crawl-delay: 10
+Disallow: /up/
+
+Sitemap: https://bitai.ffff.lt/sitemap.xml

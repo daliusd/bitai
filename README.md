@@ -18,6 +18,7 @@ Live at **https://bitai.ffff.lt** (the site itself is in Lithuanian).
 | `apps/ryskumo-gylis/` | Depth of field visualization with a 3D blur view, in Lithuanian and English (`?lang=en`) (React + TypeScript + Vite) |
 | `apps/zurkeno-kalendorius/` | Printable hamster-care calendar for kids: enter the hamster's name, year and month and download an A4 PDF built in the browser (React + TypeScript + Vite + pdf-lib) |
 | `up/` | Health check endpoint used by Kamal |
+| `robots.txt`, `sitemap.xml`, `404.html`, `images/og/` | Search engine files, the not-found page and 1200×630 link previews |
 
 ## Development
 
@@ -37,6 +38,19 @@ npm install
 npm run dev
 ```
 
+## Adding a tool
+
+Besides the card in `index.html`, a new page needs a few things for search
+engines and link previews:
+
+- a `<title>`, a `<meta name="description">` and a `<link rel="canonical">`;
+- Open Graph tags (`og:title`, `og:description`, `og:url`, `og:image`) and
+  schema.org JSON-LD: copy them from an existing page, such as
+  `apps/cholesterolis/index.html`;
+- a 1200×630 JPEG preview in `images/og/`, for example a screenshot of the
+  page in a 1200×630 window;
+- an entry in `sitemap.xml`.
+
 ## Deployment
 
 The site is packaged as an nginx Docker image (see `Dockerfile`; tests run
@@ -50,7 +64,8 @@ Or run the **Deploy** workflow from the GitHub Actions tab (manual trigger). It
 needs an `SSH_PRIVATE_KEY` repository secret holding a key that can reach the
 server.
 
-Configuration lives in `config/deploy.yml`.
+Configuration lives in `config/deploy.yml`; nginx's (gzip, caching of
+Vite's hashed assets, the 404 page) in `config/nginx.conf`.
 
 ## License
 

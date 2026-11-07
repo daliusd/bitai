@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url><loc>https://bitai.ffff.lt/</loc></url>
+  <url><loc>https://bitai.ffff.lt/pasaulines-investicijos/</loc></url>
+  <url><loc>https://bitai.ffff.lt/cholesterolis/</loc></url>
+  <url><loc>https://bitai.ffff.lt/kraujospudis/</loc></url>
+  <url><loc>https://bitai.ffff.lt/cah/</loc></url>
+  <url><loc>https://bitai.ffff.lt/laikmatis/</loc></url>
+  <url>
+    <loc>https://bitai.ffff.lt/ryskumo-gylis/?lang=lt</loc>
+    <xhtml:link rel="alternate" hreflang="lt" href="https://bitai.ffff.lt/ryskumo-gylis/?lang=lt"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://bitai.ffff.lt/ryskumo-gylis/?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://bitai.ffff.lt/ryskumo-gylis/"/>
+  </url>
+  <url>
+    <loc>https://bitai.ffff.lt/ryskumo-gylis/?lang=en</loc>
+    <xhtml:link rel="alternate" hreflang="lt" href="https://bitai.ffff.lt/ryskumo-gylis/?lang=lt"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://bitai.ffff.lt/ryskumo-gylis/?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://bitai.ffff.lt/ryskumo-gylis/"/>
+  </url>
+  <url><loc>https://bitai.ffff.lt/zurkeno-kalendorius/</loc></url>
+</urlset>

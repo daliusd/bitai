@@ -35,7 +35,8 @@ RUN npx vitest run && npm run build
 
 FROM nginx:alpine-slim AS production
 COPY . /usr/share/nginx/html
-RUN rm -rf /usr/share/nginx/html/apps
+RUN rm -rf /usr/share/nginx/html/apps /usr/share/nginx/html/config
+COPY config/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=cholesterolis /app/dist /usr/share/nginx/html/cholesterolis
 COPY --from=kraujospudis /app/dist /usr/share/nginx/html/kraujospudis
 COPY --from=laikmatis /app/dist /usr/share/nginx/html/laikmatis

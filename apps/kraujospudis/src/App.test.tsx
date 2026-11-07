@@ -12,10 +12,12 @@ async function enterReadings(readings: [string, string][]) {
     }
     const sys = screen.getByRole('textbox', { name: `${n} matavimas: sistolinis` });
     const dia = screen.getByRole('textbox', { name: `${n} matavimas: diastolinis` });
+    // Pasted rather than typed: a keystroke re-renders the whole app, and
+    // typing every digit made this slow enough to time out in a busy build.
     await user.clear(sys);
-    await user.type(sys, readings[i][0]);
+    await user.paste(readings[i][0]);
     await user.clear(dia);
-    await user.type(dia, readings[i][1]);
+    await user.paste(readings[i][1]);
   }
   return user;
 }

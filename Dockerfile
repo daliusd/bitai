@@ -26,6 +26,13 @@ RUN npm ci
 COPY apps/ryskumo-gylis/ ./
 RUN npx vitest run && npm run build
 
+FROM node:22-alpine AS zurkeno-kalendorius
+WORKDIR /app
+COPY apps/zurkeno-kalendorius/package.json apps/zurkeno-kalendorius/package-lock.json ./
+RUN npm ci
+COPY apps/zurkeno-kalendorius/ ./
+RUN npx vitest run && npm run build
+
 FROM nginx:alpine-slim AS production
 COPY . /usr/share/nginx/html
 RUN rm -rf /usr/share/nginx/html/apps
@@ -33,5 +40,6 @@ COPY --from=cholesterolis /app/dist /usr/share/nginx/html/cholesterolis
 COPY --from=kraujospudis /app/dist /usr/share/nginx/html/kraujospudis
 COPY --from=laikmatis /app/dist /usr/share/nginx/html/laikmatis
 COPY --from=ryskumo-gylis /app/dist /usr/share/nginx/html/ryskumo-gylis
+COPY --from=zurkeno-kalendorius /app/dist /usr/share/nginx/html/zurkeno-kalendorius
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]

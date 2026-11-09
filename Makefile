@@ -1,7 +1,7 @@
 .PHONY: run deploy build test
 
 PORT ?= 9876
-APPS := cholesterolis kraujospudis laikmatis ryskumo-gylis zurkeno-kalendorius
+APPS := cholesterolis kraujospudis laikmatis ryskumo-gylis zurkeno-kalendorius antra-pakopa
 
 run:
 	npx --yes http-server . -p $(PORT) -c-1

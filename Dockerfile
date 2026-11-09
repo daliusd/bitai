@@ -33,6 +33,13 @@ RUN npm ci
 COPY apps/zurkeno-kalendorius/ ./
 RUN npx vitest run && npm run build
 
+FROM node:22-alpine AS antra-pakopa
+WORKDIR /app
+COPY apps/antra-pakopa/package.json apps/antra-pakopa/package-lock.json ./
+RUN npm ci
+COPY apps/antra-pakopa/ ./
+RUN npx vitest run && npm run build
+
 FROM nginx:alpine-slim AS production
 COPY . /usr/share/nginx/html
 RUN rm -rf /usr/share/nginx/html/apps /usr/share/nginx/html/config
@@ -42,5 +49,6 @@ COPY --from=kraujospudis /app/dist /usr/share/nginx/html/kraujospudis
 COPY --from=laikmatis /app/dist /usr/share/nginx/html/laikmatis
 COPY --from=ryskumo-gylis /app/dist /usr/share/nginx/html/ryskumo-gylis
 COPY --from=zurkeno-kalendorius /app/dist /usr/share/nginx/html/zurkeno-kalendorius
+COPY --from=antra-pakopa /app/dist /usr/share/nginx/html/antra-pakopa
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]

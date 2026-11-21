@@ -18,6 +18,7 @@ Live at **https://bitai.ffff.lt** (the site itself is in Lithuanian).
 | `apps/ryskumo-gylis/` | Depth of field visualization with a 3D blur view, in Lithuanian and English (`?lang=en`) (React + TypeScript + Vite) |
 | `apps/zurkeno-kalendorius/` | Printable hamster-care calendar for kids: enter the hamster's name, year and month and download an A4 PDF built in the browser (React + TypeScript + Vite + pdf-lib) |
 | `apps/antra-pakopa/` | Second pension pillar calculator: by age and today's date, why moving the money to the third pillar or an ETF may be worth it during the 2026–2027 exit window, and what each option costs (React + TypeScript + Vite) |
+| `apps/hebraju-abecele/` | Hebrew alphabet flashcards: letters, vowel points and syllables with Lithuanian transcription, in book print, block or handwritten script; cards you miss come back more often (React + TypeScript + Vite) |
 | `up/` | Health check endpoint used by Kamal |
 | `robots.txt`, `sitemap.xml`, `404.html`, `images/og/` | Search engine files, the not-found page and 1200×630 link previews |
 
@@ -27,14 +28,14 @@ Requires Node.js 22+.
 
 ```sh
 make run     # serve the repo at http://localhost:9876
-make build   # build the React apps into ./cholesterolis, ./kraujospudis, ./laikmatis, ./ryskumo-gylis, ./zurkeno-kalendorius and ./antra-pakopa
+make build   # build the React apps into ./cholesterolis, ./kraujospudis, ./laikmatis, ./ryskumo-gylis, ./zurkeno-kalendorius, ./antra-pakopa and ./hebraju-abecele
 make test    # run the React apps' tests (Vitest)
 ```
 
 To work on an app with hot reload:
 
 ```sh
-cd apps/cholesterolis   # or apps/kraujospudis, apps/laikmatis, apps/ryskumo-gylis, apps/zurkeno-kalendorius, apps/antra-pakopa
+cd apps/cholesterolis   # or apps/kraujospudis, apps/laikmatis, apps/ryskumo-gylis, apps/zurkeno-kalendorius, apps/antra-pakopa, apps/hebraju-abecele
 npm install
 npm run dev
 ```
